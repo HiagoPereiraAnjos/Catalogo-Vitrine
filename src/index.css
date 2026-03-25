@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+:root {
+  --brand-ink: #111827;
+  --brand-accent: #1e3a8a;
+  --brand-accent-soft: #dbeafe;
+  --brand-muted: #6b7280;
+  --brand-bg: #f6f5f3;
+  --brand-surface: #ffffff;
+  --brand-border: #e5e7eb;
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-sans: "Manrope", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased text-gray-900;
+    font-family: var(--font-sans);
+    background: radial-gradient(circle at top right, #f1f5f9 0%, var(--brand-bg) 40%, var(--brand-bg) 100%);
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-2xl border border-gray-200/80 bg-white shadow-[0_14px_38px_-30px_rgba(15,23,42,0.5)];
+  }
+
+  .surface-card-strong {
+    @apply rounded-3xl border border-gray-200/80 bg-white shadow-[0_24px_64px_-42px_rgba(15,23,42,0.55)];
+  }
+
+  .surface-card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_58px_-40px_rgba(15,23,42,0.6)];
+    transition-timing-function: var(--ease-premium);
+  }
+
+  .section-shell {
+    @apply py-16 md:py-20;
+  }
+
+  .section-shell-tight {
+    @apply py-12 md:py-16;
+  }
+
+  .section-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500;
+  }
+
+  .section-title {
+    @apply text-3xl tracking-tight text-gray-900 md:text-4xl;
+    font-family: var(--font-serif);
+  }
+
+  .section-support {
+    @apply text-sm leading-relaxed text-gray-600 md:text-base;
+  }
+
+  .field-control {
+    @apply block w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200;
+    transition-timing-function: var(--ease-soft);
+  }
+
+  .badge-chip {
+    @apply inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700;
+  }
+
+  .section-divider {
+    @apply h-px w-16 bg-gray-900/80;
+  }
+
+  .premium-interactive {
+    @apply transition-all duration-200 active:scale-[0.99];
+    transition-timing-function: var(--ease-premium);
+  }
+
+  .premium-focus {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+
+  .premium-chip {
+    @apply transition-all duration-200 hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(15,23,42,0.45)];
+    transition-timing-function: var(--ease-premium);
+  }
+
+  .premium-reveal {
+    animation: fade-up 420ms var(--ease-premium) both;
+  }
+
+  .premium-reveal-delay-1 {
+    animation-delay: 70ms;
+  }
+
+  .premium-reveal-delay-2 {
+    animation-delay: 130ms;
+  }
+
+  .premium-reveal-delay-3 {
+    animation-delay: 190ms;
+  }
+}
+
+::selection {
+  background: var(--brand-accent-soft);
+  color: var(--brand-ink);
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+}
+
+@keyframes float-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

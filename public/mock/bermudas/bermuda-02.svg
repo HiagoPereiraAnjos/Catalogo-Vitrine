@@ -1,0 +1,18 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f2f5f8"/>
+      <stop offset="100%" stop-color="#e7ecf4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#bg)"/>
+  <rect x="84" y="104" width="1032" height="1292" rx="40" stroke="#233145" stroke-opacity="0.18" stroke-width="2"/>
+  <rect x="122" y="146" width="956" height="1210" rx="30" stroke="#233145" stroke-opacity="0.12" stroke-width="1.5"/>
+  <path d="M450 544 L610 544 L610 864 L450 864 Z M530 544 L530 864 M464 736 L596 736" fill="none" stroke="#233145" stroke-opacity="0.65" stroke-width="11"/>
+  <circle cx="164" cy="164" r="8" fill="#233145" fill-opacity="0.48"/>
+  <circle cx="194" cy="164" r="8" fill="#233145" fill-opacity="0.32"/>
+  <circle cx="224" cy="164" r="8" fill="#233145" fill-opacity="0.2"/>
+  <text x="140" y="1252" fill="#233145" fill-opacity="0.92" font-size="54" font-family="Manrope, Arial, sans-serif" font-weight="600">Bermuda Summer</text>
+  <text x="140" y="1304" fill="#233145" fill-opacity="0.58" font-size="28" font-family="Manrope, Arial, sans-serif" font-weight="500" letter-spacing="0.06em">Studio Mock</text>
+  <text x="140" y="1348" fill="#233145" fill-opacity="0.42" font-size="18" font-family="Manrope, Arial, sans-serif" letter-spacing="0.2em">DENIM PREMIUM MOCK</text>
+</svg>
