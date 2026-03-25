@@ -8,6 +8,30 @@
   --brand-bg: #f6f5f3;
   --brand-surface: #ffffff;
   --brand-border: #e5e7eb;
+  --theme-primary: #1e3a8a;
+  --theme-primary-strong: #1b3274;
+  --theme-primary-subtle: #2f4da3;
+  --theme-highlight: #dbeafe;
+  --theme-support: #475569;
+  --theme-primary-rgb: 30, 58, 138;
+  --theme-highlight-rgb: 219, 234, 254;
+  --theme-support-rgb: 71, 85, 105;
+  --btn-primary-bg: var(--theme-primary);
+  --btn-primary-bg-hover: var(--theme-primary-strong);
+  --btn-primary-text: #ffffff;
+  --btn-primary-border: transparent;
+  --btn-primary-shadow: 0 14px 32px -22px rgba(30, 58, 138, 0.66);
+  --btn-secondary-bg: rgba(219, 234, 254, 0.56);
+  --btn-secondary-bg-hover: rgba(219, 234, 254, 0.82);
+  --btn-secondary-text: var(--theme-primary);
+  --btn-secondary-border: rgba(30, 58, 138, 0.2);
+  --btn-outline-bg: #ffffff;
+  --btn-outline-bg-hover: rgba(30, 58, 138, 0.08);
+  --btn-outline-text: var(--theme-primary);
+  --btn-outline-border: rgba(30, 58, 138, 0.3);
+  --btn-ghost-text: var(--theme-support);
+  --btn-ghost-hover-bg: rgba(30, 58, 138, 0.08);
+  --btn-ghost-hover-text: var(--theme-primary);
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
   --font-sans: "Manrope", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
@@ -22,7 +46,12 @@
   body {
     @apply antialiased text-gray-900;
     font-family: var(--font-sans);
-    background: radial-gradient(circle at top right, #f1f5f9 0%, var(--brand-bg) 40%, var(--brand-bg) 100%);
+    background: radial-gradient(
+      circle at top right,
+      rgba(var(--theme-highlight-rgb), 0.72) 0%,
+      var(--brand-bg) 42%,
+      var(--brand-bg) 100%
+    );
   }
 
   *,
@@ -36,15 +65,30 @@
   h3 {
     text-wrap: balance;
   }
+
+  button,
+  [role='button'],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
 
 @layer components {
   .surface-card {
     @apply rounded-2xl border border-gray-200/80 bg-white shadow-[0_14px_38px_-30px_rgba(15,23,42,0.5)];
+    border-color: var(--brand-border);
+    background-color: var(--brand-surface);
   }
 
   .surface-card-strong {
     @apply rounded-3xl border border-gray-200/80 bg-white shadow-[0_24px_64px_-42px_rgba(15,23,42,0.55)];
+    border-color: var(--brand-border);
+    background-color: var(--brand-surface);
   }
 
   .surface-card-hover {
@@ -62,6 +106,7 @@
 
   .section-eyebrow {
     @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-500;
+    color: var(--theme-support);
   }
 
   .section-title {
@@ -75,24 +120,38 @@
 
   .field-control {
     @apply block w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200;
+    border-color: var(--brand-border);
+    background-color: var(--brand-surface);
     transition-timing-function: var(--ease-soft);
+  }
+
+  .field-control:focus {
+    border-color: rgba(var(--theme-primary-rgb), 0.52);
+    box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb), 0.18);
   }
 
   .badge-chip {
     @apply inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium tracking-wide text-gray-700;
+    border-color: rgba(var(--theme-primary-rgb), 0.18);
+    color: var(--theme-primary);
   }
 
   .section-divider {
     @apply h-px w-16 bg-gray-900/80;
+    background-color: var(--theme-primary);
   }
 
   .premium-interactive {
-    @apply transition-all duration-200 active:scale-[0.99];
+    @apply cursor-pointer transition-all duration-200 active:scale-[0.99];
     transition-timing-function: var(--ease-premium);
   }
 
   .premium-focus {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  }
+
+  .premium-focus:focus-visible {
+    box-shadow: 0 0 0 2px rgba(var(--theme-primary-rgb), 0.28);
   }
 
   .premium-chip {
@@ -114,6 +173,102 @@
 
   .premium-reveal-delay-3 {
     animation-delay: 190ms;
+  }
+
+  .btn-variant-primary {
+    border-color: var(--btn-primary-border);
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: var(--btn-primary-shadow);
+  }
+
+  .btn-variant-primary:hover {
+    background-color: var(--btn-primary-bg-hover);
+  }
+
+  .btn-variant-primary:focus-visible {
+    outline-color: rgba(var(--theme-primary-rgb), 0.5);
+  }
+
+  .btn-variant-secondary {
+    border-color: var(--btn-secondary-border);
+    background-color: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+  }
+
+  .btn-variant-secondary:hover {
+    background-color: var(--btn-secondary-bg-hover);
+  }
+
+  .btn-variant-danger {
+    border-color: transparent;
+    background-color: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 10px 28px -18px rgba(220, 38, 38, 0.5);
+  }
+
+  .btn-variant-danger:hover {
+    background-color: #b91c1c;
+  }
+
+  .btn-variant-outline {
+    border-color: var(--btn-outline-border);
+    background-color: var(--btn-outline-bg);
+    color: var(--btn-outline-text);
+    box-shadow: 0 10px 26px -20px rgba(15, 23, 42, 0.28);
+  }
+
+  .btn-variant-outline:hover {
+    background-color: var(--btn-outline-bg-hover);
+  }
+
+  .btn-variant-ghost {
+    border-color: transparent;
+    background-color: transparent;
+    color: var(--btn-ghost-text);
+  }
+
+  .btn-variant-ghost:hover {
+    background-color: var(--btn-ghost-hover-bg);
+    color: var(--btn-ghost-hover-text);
+  }
+
+  .btn-variant-light {
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: #ffffff;
+    color: #111827;
+    box-shadow: 0 16px 36px -26px rgba(255, 255, 255, 0.95);
+  }
+
+  .btn-variant-light:hover {
+    background-color: #f3f4f6;
+  }
+
+  .nav-pill-active {
+    background-color: var(--theme-primary);
+    color: #ffffff;
+    box-shadow: 0 10px 24px -18px rgba(var(--theme-primary-rgb), 0.7);
+  }
+
+  .nav-pill-active:hover {
+    background-color: var(--theme-primary-strong);
+  }
+
+  .nav-pill-idle {
+    color: #4b5563;
+  }
+
+  .nav-pill-idle:hover {
+    background-color: rgba(var(--theme-primary-rgb), 0.1);
+    color: var(--theme-primary);
+  }
+
+  .theme-text-primary {
+    color: var(--theme-primary);
+  }
+
+  .theme-link-soft:hover {
+    color: var(--theme-primary-subtle);
   }
 }
 

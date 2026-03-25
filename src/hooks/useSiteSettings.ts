@@ -16,6 +16,7 @@ interface UseSiteSettingsResult {
     moduleKey: K,
     nextModuleSettings: DeepPartial<SiteSettings[K]>
   ) => SiteSettings;
+  resetModuleSettings: <K extends SiteSettingsModuleKey>(moduleKey: K) => SiteSettings;
   resetSettings: () => SiteSettings;
 }
 
@@ -87,6 +88,20 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
     }
   }, []);
 
+  const resetModuleSettings = useCallback(<K extends SiteSettingsModuleKey>(moduleKey: K) => {
+    setError(null);
+
+    try {
+      const resetedSettings = SiteSettingsService.resetModule(moduleKey);
+      setSettings(resetedSettings);
+      return resetedSettings;
+    } catch (caughtError) {
+      console.error(`Failed to reset site settings module "${moduleKey}"`, caughtError);
+      setError('Nao foi possivel restaurar este modulo para o padrao.');
+      throw caughtError;
+    }
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return undefined;
@@ -126,8 +141,9 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
       refreshSettings,
       saveSettings,
       saveModuleSettings,
+      resetModuleSettings,
       resetSettings
     }),
-    [settings, isLoading, error, refreshSettings, saveSettings, saveModuleSettings, resetSettings]
+    [settings, isLoading, error, refreshSettings, saveSettings, saveModuleSettings, resetModuleSettings, resetSettings]
   );
 };

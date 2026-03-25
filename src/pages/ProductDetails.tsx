@@ -22,6 +22,8 @@ import { buildWhatsAppHref, whatsappPrimaryButtonClass } from '../utils/whatsapp
 import { usePageSeo } from '../hooks/usePageSeo';
 import { WhatsAppLogo } from '../components/icons/WhatsAppLogo';
 import { Product } from '../types';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { defaultSiteSettings } from '../data/defaultSiteSettings';
 
 interface ProductNarrative {
   fit: string;
@@ -33,6 +35,8 @@ interface ProductNarrative {
   qualityNote: string;
   highlights: string[];
 }
+
+const getPrimaryProductImage = (product?: Product) => product?.featuredImage || product?.images?.[0] || '';
 
 const normalizeKey = (value: string) =>
   value
@@ -147,31 +151,37 @@ export const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { products, isLoading } = useProducts();
+  const { settings } = useSiteSettings();
+  const brand = settings.brand;
+  const seo = settings.seo;
 
   const [product, setProduct] = useState(products.find((item) => item.id === id));
-  const [mainImage, setMainImage] = useState(product?.featuredImage || '');
+  const [mainImage, setMainImage] = useState(getPrimaryProductImage(product));
 
   useEffect(() => {
     const foundProduct = products.find((item) => item.id === id);
     setProduct(foundProduct);
     if (foundProduct) {
-      setMainImage(foundProduct.featuredImage);
+      setMainImage(getPrimaryProductImage(foundProduct));
     }
   }, [id, products]);
 
-  const productSeoTitle = product ? `${product.name} | Jeans ${product.category}` : 'Detalhes do Produto';
+  const seoTitleBase = seo.productDetails.title || defaultSiteSettings.seo.productDetails.title;
+  const seoDescriptionFallback = seo.productDetails.description || defaultSiteSettings.seo.productDetails.description;
+
+  const productSeoTitle = product ? `${product.name} | ${seoTitleBase}` : seoTitleBase;
   const productSeoDescription = product
     ? `${product.name}. SKU ${product.sku || product.id}. ${product.category} ${product.gender} por ${formatPrice(
         product.price
-      )}. Coleção ${product.collection || 'Denim Premium'} ${product.season ? `- ${product.season}` : ''}. Confira fotos, tamanhos e lavagens disponíveis.`
-    : 'Veja detalhes de produto, fotos, informações de modelagem e atendimento consultivo da Denim Premium.';
+      )}. Colecao ${product.collection || brand.name} ${product.season ? `- ${product.season}` : ''}. ${seoDescriptionFallback}`
+    : seoDescriptionFallback;
 
   usePageSeo({
     title: productSeoTitle,
     description: productSeoDescription,
     image: product?.featuredImage,
     type: 'product',
-    keywords: 'produto jeans premium, detalhes do produto, modelagem jeans, lavagem jeans'
+    keywords: seo.primaryKeywords || defaultSiteSettings.seo.primaryKeywords
   });
 
   if (isLoading) {
@@ -309,12 +319,18 @@ export const ProductDetails: React.FC = () => {
             <span className="badge-chip premium-chip">{product.category}</span>
             <span className="badge-chip premium-chip">{product.gender}</span>
             {narrative.collection && (
-              <span className="badge-chip premium-chip border-indigo-100 bg-indigo-50 text-indigo-700">{narrative.collection}</span>
+              <span className="badge-chip premium-chip border-[rgba(var(--theme-primary-rgb),0.22)] bg-[rgba(var(--theme-highlight-rgb),0.62)] text-[var(--theme-primary)]">
+                {narrative.collection}
+              </span>
             )}
             {narrative.season && (
-              <span className="badge-chip premium-chip border-purple-100 bg-purple-50 text-purple-700">{narrative.season}</span>
+              <span className="badge-chip premium-chip border-[rgba(var(--theme-primary-rgb),0.2)] bg-[rgba(var(--theme-highlight-rgb),0.45)] text-[var(--theme-primary-subtle)]">
+                {narrative.season}
+              </span>
             )}
-            <span className="badge-chip premium-chip border-blue-100 bg-blue-50 text-blue-700">{badge}</span>
+            <span className="badge-chip premium-chip border-[rgba(var(--theme-primary-rgb),0.22)] bg-[rgba(var(--theme-highlight-rgb),0.62)] text-[var(--theme-primary)]">
+              {badge}
+            </span>
             <span className={`badge-chip premium-chip ${stockStatus.toneClassName}`}>{stockStatus.shortLabel}</span>
           </div>
 

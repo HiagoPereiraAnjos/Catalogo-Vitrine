@@ -1,13 +1,24 @@
 import { defaultSiteSettings } from '../data/defaultSiteSettings';
 import { SiteSettingsService } from '../services/siteSettingsService';
-import { SiteBrandSettings } from '../types/siteSettings';
+import { SiteBrandSettings, SiteContactSettings, SiteSeoSettings } from '../types/siteSettings';
 
-export const getBrandSettingsSnapshot = (): SiteBrandSettings => {
+const getSettingsSnapshot = () => {
   try {
-    return SiteSettingsService.getSettings().brand;
+    return SiteSettingsService.getSettings();
   } catch (error) {
-    console.error('Falha ao carregar configuracoes da marca. Usando padrao.', error);
-    return defaultSiteSettings.brand;
+    console.error('Falha ao carregar configuracoes do site. Usando padrao.', error);
+    return defaultSiteSettings;
   }
 };
 
+export const getBrandSettingsSnapshot = (): SiteBrandSettings => {
+  return getSettingsSnapshot().brand;
+};
+
+export const getContactSettingsSnapshot = (): SiteContactSettings => {
+  return getSettingsSnapshot().contact;
+};
+
+export const getSeoSettingsSnapshot = (): SiteSeoSettings => {
+  return getSettingsSnapshot().seo;
+};

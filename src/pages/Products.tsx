@@ -12,12 +12,15 @@ import { ProductsGrid } from './products/components/ProductsGrid';
 import { buildActiveFilterTags, getAvailableCollections, getAvailableColors, getAvailableSizes } from './products/utils';
 import { usePageSeo } from '../hooks/usePageSeo';
 import { CategoriesService } from '../services/categoriesService';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { defaultSiteSettings } from '../data/defaultSiteSettings';
 
 export default function Products() {
   const location = useLocation();
   const initialSearch = useMemo(() => new URLSearchParams(location.search).get('search') || '', [location.search]);
 
   const { products, isLoading: isProductsLoading } = useProducts();
+  const { settings } = useSiteSettings();
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isLocalLoading, setIsLocalLoading] = useState(true);
   const [customCategories, setCustomCategories] = useState<string[]>([]);
@@ -84,6 +87,8 @@ export default function Products() {
 
   const openMobileFilters = useCallback(() => setIsMobileFiltersOpen(true), []);
   const closeMobileFilters = useCallback(() => setIsMobileFiltersOpen(false), []);
+  const seo = settings.seo;
+  const seoImage = products[0]?.featuredImage || defaultSiteSettings.seo.defaultOgImage;
 
   const sharedFilterProps = useMemo(
     () => ({
@@ -122,12 +127,11 @@ export default function Products() {
   );
 
   usePageSeo({
-    title: 'Coleção de Jeans Masculino, Feminino e Unissex',
-    description:
-      'Navegue pelo catálogo de jeans premium com filtros por coleção, categoria, gênero, tamanho, cor e faixa de preço para encontrar a peça ideal.',
-    image: 'https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=1200&auto=format&fit=crop',
+    title: seo.products.title || defaultSiteSettings.seo.products.title,
+    description: seo.products.description || defaultSiteSettings.seo.products.description,
+    image: seoImage,
     type: 'website',
-    keywords: 'catálogo de jeans, jeans premium, calças jeans, jaquetas jeans, shorts jeans'
+    keywords: seo.primaryKeywords || defaultSiteSettings.seo.primaryKeywords
   });
 
   return (

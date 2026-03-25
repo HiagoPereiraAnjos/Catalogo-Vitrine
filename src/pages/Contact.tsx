@@ -1,11 +1,12 @@
 ﻿import { FormEvent, useMemo, useState } from 'react';
-import { CheckCircle2, Instagram, Mail, MapPin, Phone, Send, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock3, Facebook, Instagram, Mail, MapPin, Phone, Send, XCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Container } from '../components/Container';
 import { buildWhatsAppHref, whatsappPrimaryButtonClass } from '../utils/whatsapp';
 import { usePageSeo } from '../hooks/usePageSeo';
 import { WhatsAppLogo } from '../components/icons/WhatsAppLogo';
 import { CatalogImage } from '../components/CatalogImage';
+import { defaultSiteSettings } from '../data/defaultSiteSettings';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 
 interface ContactFormState {
@@ -39,6 +40,24 @@ const initialState: ContactFormState = {
 
 const isValidEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 
+const resolveText = (value: string, fallback: string) => {
+  const sanitized = value.trim();
+  return sanitized || fallback;
+};
+
+const normalizeExternalLink = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.includes('://')) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+};
+
 const getFieldClassName = (hasError: boolean) =>
   `field-control ${
     hasError
@@ -49,21 +68,56 @@ const getFieldClassName = (hasError: boolean) =>
 export default function Contact() {
   const { settings } = useSiteSettings();
   const brand = settings.brand;
+  const about = settings.about;
+  const contact = settings.contact;
+  const seo = settings.seo;
+  const contactFallback = defaultSiteSettings.contact;
+
   const [form, setForm] = useState<ContactFormState>(initialState);
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [status, setStatus] = useState<FormStatus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasStatus = useMemo(() => status !== null, [status]);
+
+  const title = resolveText(contact.title, contactFallback.title);
+  const subtitle = resolveText(contact.subtitle, contactFallback.subtitle);
+  const supportText = resolveText(contact.supportText, contactFallback.supportText);
+  const ctaTitle = resolveText(contact.ctaTitle, contactFallback.ctaTitle);
+  const ctaDescription = resolveText(contact.ctaDescription, contactFallback.ctaDescription);
+  const primaryCtaLabel = resolveText(contact.primaryCtaLabel, contactFallback.primaryCtaLabel);
+
+  const whatsappDisplay = resolveText(
+    contact.whatsappDisplay,
+    brand.whatsappDisplay || contactFallback.whatsappDisplay
+  );
+  const secondaryPhone = contact.secondaryPhone.trim();
+  const contactEmail = resolveText(contact.email, brand.contactEmail || contactFallback.email);
+  const instagramHandle = resolveText(
+    contact.instagramHandle,
+    brand.instagramHandle || contactFallback.instagramHandle
+  );
+  const instagramUrl = normalizeExternalLink(
+    resolveText(contact.instagramUrl, brand.instagramUrl || contactFallback.instagramUrl)
+  );
+  const facebookLabel = contact.facebookLabel.trim();
+  const facebookUrl = normalizeExternalLink(contact.facebookUrl);
+
+  const addressLine1 = resolveText(contact.addressLine1, brand.addressLine1 || contactFallback.addressLine1);
+  const addressLine2 = resolveText(contact.addressLine2, brand.addressLine2 || contactFallback.addressLine2);
+  const businessHours = resolveText(contact.businessHours, contactFallback.businessHours);
+  const contactHeroImage =
+    brand.institutionalImage || about.heroImage || defaultSiteSettings.about.heroImage;
+  const hasInstagram = contact.showSocialLinks && Boolean(instagramUrl);
+
   const contactWhatsAppHref = buildWhatsAppHref({ context: 'contact', intent: 'contact-form' });
 
   usePageSeo({
-    title: 'Contato e Atendimento',
-    description:
-      'Entre em contato com a Denim Premium por WhatsApp, e-mail ou formulário. Receba suporte para tamanho, modelagem e escolha de peças.',
-    image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1200&auto=format&fit=crop',
+    title: seo.contact.title || defaultSiteSettings.seo.contact.title,
+    description: seo.contact.description || defaultSiteSettings.seo.contact.description,
+    image: contactHeroImage,
     type: 'website',
-    keywords: 'contato jeans premium, atendimento whatsapp, suporte de moda jeans'
+    keywords: seo.primaryKeywords || defaultSiteSettings.seo.primaryKeywords
   });
 
   const validate = () => {
@@ -74,7 +128,7 @@ export default function Contact() {
     }
 
     if (!isValidEmail(form.email.trim())) {
-      nextErrors.email = 'Informe um e-mail válido.';
+      nextErrors.email = 'Informe um e-mail valido.';
     }
 
     if (!form.message.trim() || form.message.trim().length < 12) {
@@ -110,7 +164,7 @@ export default function Contact() {
     <article className="bg-transparent">
       <section className="relative h-[52vh] min-h-[430px] overflow-hidden" aria-labelledby="contact-page-title">
         <CatalogImage
-          src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=2200&auto=format&fit=crop"
+          src={contactHeroImage}
           alt="Atendimento da marca"
           className="absolute inset-0 h-full w-full object-cover"
           referrerPolicy="no-referrer"
@@ -120,12 +174,14 @@ export default function Contact() {
         <Container className="relative z-10 flex h-full items-end pb-14">
           <div className="max-w-3xl text-white">
             <p className="mb-4 text-xs uppercase tracking-[0.22em] text-gray-200">Contato</p>
-            <h1 id="contact-page-title" className="text-4xl font-light leading-tight md:text-5xl" style={{ fontFamily: 'var(--font-serif)' }}>
-              Converse com nosso time e receba atendimento consultivo
+            <h1
+              id="contact-page-title"
+              className="text-4xl font-light leading-tight md:text-5xl"
+              style={{ fontFamily: 'var(--font-serif)' }}
+            >
+              {title}
             </h1>
-            <p className="mt-5 max-w-2xl text-base text-gray-200 md:text-lg">
-              Estamos prontos para apoiar sua decisão com orientação de tamanho, combinação de peças e sugestões comerciais.
-            </p>
+            <p className="mt-5 max-w-2xl text-base text-gray-200 md:text-lg">{subtitle}</p>
           </div>
         </Container>
       </section>
@@ -135,14 +191,18 @@ export default function Contact() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr]">
             <div className="space-y-6">
               <div className="surface-card premium-reveal-delay-1 rounded-3xl border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-6">
-                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-green-700">Canal prioritário</p>
-                <h2 className="mb-3 text-2xl font-semibold text-green-900">Atendimento rápido no WhatsApp</h2>
-                <p className="mb-5 text-sm text-green-800">
-                  Fale diretamente com nosso time comercial e receba orientação sobre tamanho, disponibilidade e melhores combinações.
-                </p>
-                <a href={contactWhatsAppHref} target="_blank" rel="noopener noreferrer" className={whatsappPrimaryButtonClass}>
+                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-green-700">Canal prioritario</p>
+                <h2 className="mb-3 text-2xl font-semibold text-green-900">{ctaTitle}</h2>
+                <p className="mb-3 text-sm text-green-800">{ctaDescription}</p>
+                <p className="mb-5 text-sm text-green-800">{supportText}</p>
+                <a
+                  href={contactWhatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={whatsappPrimaryButtonClass}
+                >
                   <WhatsAppLogo className="h-4 w-4" />
-                  Falar com especialista agora
+                  {primaryCtaLabel}
                 </a>
               </div>
 
@@ -151,52 +211,105 @@ export default function Contact() {
                   <Mail className="mt-0.5 h-5 w-5 text-gray-600" />
                   <div>
                     <p className="text-sm font-semibold text-gray-900">E-mail</p>
-                    <a href={`mailto:${brand.contactEmail}`} className="text-sm text-gray-600 transition-colors hover:text-gray-900">
-                      {brand.contactEmail}
+                    <a
+                      href={`mailto:${contactEmail}`}
+                      className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                    >
+                      {contactEmail}
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="mt-0.5 h-5 w-5 text-gray-600" />
+                  <WhatsAppLogo className="mt-0.5 h-5 w-5 text-green-600" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Telefone</p>
-                    <p className="text-sm text-gray-600">{brand.whatsappDisplay}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Instagram className="mt-0.5 h-5 w-5 text-gray-600" />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">Instagram</p>
+                    <p className="text-sm font-semibold text-gray-900">WhatsApp</p>
                     <a
-                      href={brand.instagramUrl}
+                      href={contactWhatsAppHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-gray-600 transition-colors hover:text-gray-900"
                     >
-                      {brand.instagramHandle}
+                      {whatsappDisplay}
                     </a>
                   </div>
                 </div>
 
+                {secondaryPhone && (
+                  <div className="flex items-start gap-3">
+                    <Phone className="mt-0.5 h-5 w-5 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Telefone secundario</p>
+                      <p className="text-sm text-gray-600">{secondaryPhone}</p>
+                    </div>
+                  </div>
+                )}
+
+                {contact.showSocialLinks && (
+                  <>
+                    {hasInstagram && (
+                      <div className="flex items-start gap-3">
+                        <Instagram className="mt-0.5 h-5 w-5 text-gray-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Instagram</p>
+                          <a
+                            href={instagramUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                          >
+                            {instagramHandle}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {facebookLabel && facebookUrl && (
+                      <div className="flex items-start gap-3">
+                        <Facebook className="mt-0.5 h-5 w-5 text-gray-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Facebook</p>
+                          <a
+                            href={facebookUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-gray-600 transition-colors hover:text-gray-900"
+                          >
+                            {facebookLabel}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {contact.showAddress && (
+                  <div className="flex items-start gap-3">
+                    <MapPin className="mt-0.5 h-5 w-5 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Endereco</p>
+                      <p className="text-sm text-gray-600">
+                        {addressLine1} - {addressLine2}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 h-5 w-5 text-gray-600" />
+                  <Clock3 className="mt-0.5 h-5 w-5 text-gray-600" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Estúdio</p>
-                    <p className="text-sm text-gray-600">
-                      {brand.addressLine1} - Bela Vista - {brand.addressLine2}
-                    </p>
+                    <p className="text-sm font-semibold text-gray-900">Horario de atendimento</p>
+                    <p className="text-sm text-gray-600">{businessHours}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="surface-card-strong premium-reveal-delay-3 p-6 md:p-7">
-              <p className="section-eyebrow mb-3">Formulário</p>
+              <p className="section-eyebrow mb-3">Formulario</p>
               <h2 className="section-title text-3xl">Envie sua mensagem</h2>
               <p className="mt-2 text-sm text-gray-600">
-                Este formulário não envia dados reais, mas simula a experiência institucional da marca.
+                Este formulario nao envia dados reais, mas simula a experiencia institucional da marca.
               </p>
 
               <AnimatePresence initial={false}>
@@ -214,7 +327,11 @@ export default function Contact() {
                         : 'border-red-200 bg-red-50 text-red-700'
                     }`}
                   >
-                    {status?.type === 'success' ? <CheckCircle2 className="mt-0.5 h-4 w-4" /> : <XCircle className="mt-0.5 h-4 w-4" />}
+                    {status?.type === 'success' ? (
+                      <CheckCircle2 className="mt-0.5 h-4 w-4" />
+                    ) : (
+                      <XCircle className="mt-0.5 h-4 w-4" />
+                    )}
                     <p className="text-sm">{status?.message}</p>
                   </motion.div>
                 )}
@@ -264,7 +381,7 @@ export default function Contact() {
                       value={form.phone}
                       onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
                       className={getFieldClassName(Boolean(errors.phone))}
-                      placeholder={brand.whatsappDisplay}
+                      placeholder={whatsappDisplay}
                     />
                   </div>
 
@@ -278,7 +395,7 @@ export default function Contact() {
                       value={form.subject}
                       onChange={(event) => setForm((prev) => ({ ...prev, subject: event.target.value }))}
                       className={getFieldClassName(Boolean(errors.subject))}
-                      placeholder="Ex: Dúvida sobre tamanho"
+                      placeholder="Ex: Duvida sobre tamanho"
                     />
                   </div>
                 </div>
@@ -320,4 +437,3 @@ export default function Contact() {
     </article>
   );
 }
-

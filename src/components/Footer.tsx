@@ -1,11 +1,12 @@
 ﻿import React from 'react';
 import { ArrowRight, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { defaultSiteSettings } from '../data/defaultSiteSettings';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import { buildWhatsAppHref } from '../utils/whatsapp';
+import { CatalogImage } from './CatalogImage';
 import { Container } from './Container';
 import { WhatsAppLogo } from './icons/WhatsAppLogo';
-import { useSiteSettings } from '../hooks/useSiteSettings';
-import { CatalogImage } from './CatalogImage';
 
 const footerLinkClassName =
   'premium-focus premium-interactive rounded-sm -ml-1 px-1 text-gray-300 hover:text-white focus-visible:ring-white';
@@ -13,10 +14,39 @@ const footerLinkClassName =
 const socialLinkClassName =
   'premium-focus premium-interactive inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/[0.03] text-gray-400 hover:border-white/35 hover:bg-white/[0.08] hover:text-white focus-visible:ring-white';
 
+const resolveText = (value: string, fallback: string) => {
+  const sanitized = value.trim();
+  return sanitized || fallback;
+};
+
+const resolveList = (value: string[], fallback: string[]) => {
+  const sanitized = value.map((item) => item.trim()).filter(Boolean);
+  return sanitized.length > 0 ? sanitized : fallback;
+};
+
+const normalizeExternalLink = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (trimmed.includes('://')) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
+};
+
 export const Footer: React.FC = () => {
   const location = useLocation();
   const { settings } = useSiteSettings();
   const brand = settings.brand;
+  const home = settings.home;
+  const contact = settings.contact;
+
+  const fallbackBrand = defaultSiteSettings.brand;
+  const fallbackHome = defaultSiteSettings.home;
+  const fallbackContact = defaultSiteSettings.contact;
 
   const footerWhatsAppHref = buildWhatsAppHref({
     context: 'floating',
@@ -24,7 +54,34 @@ export const Footer: React.FC = () => {
     intent: 'general'
   });
 
-  const hasAddress = Boolean(brand.addressLine1 || brand.addressLine2);
+  const brandName = resolveText(brand.name, fallbackBrand.name);
+  const brandShortName = resolveText(brand.shortName, fallbackBrand.shortName || brandName);
+  const brandTagline = resolveText(brand.tagline, fallbackBrand.tagline);
+  const brandSignature = resolveText(brand.signature, fallbackBrand.signature);
+
+  const signatureItems = resolveList(home.benefitsItems, fallbackHome.benefitsItems).slice(0, 4);
+  const footerCtaLabel = resolveText(contact.primaryCtaLabel, fallbackContact.primaryCtaLabel);
+
+  const instagramHandle = resolveText(
+    contact.instagramHandle,
+    resolveText(brand.instagramHandle, fallbackContact.instagramHandle)
+  );
+  const instagramUrl = normalizeExternalLink(
+    resolveText(contact.instagramUrl, resolveText(brand.instagramUrl, fallbackContact.instagramUrl))
+  );
+
+  const showSocialLinks = contact.showSocialLinks;
+  const hasInstagram = showSocialLinks && Boolean(instagramUrl);
+
+  const addressLine1 = resolveText(contact.addressLine1, resolveText(brand.addressLine1, fallbackContact.addressLine1));
+  const addressLine2 = resolveText(contact.addressLine2, resolveText(brand.addressLine2, fallbackContact.addressLine2));
+  const hasAddress = contact.showAddress && Boolean(addressLine1 || addressLine2);
+
+  const whatsappDisplay = resolveText(
+    contact.whatsappDisplay,
+    resolveText(brand.whatsappDisplay, fallbackContact.whatsappDisplay)
+  );
+  const contactEmail = resolveText(contact.email, resolveText(brand.contactEmail, fallbackContact.email));
 
   return (
     <footer className="border-t border-gray-900 bg-gray-950 py-16 text-gray-300">
@@ -36,28 +93,29 @@ export const Footer: React.FC = () => {
                 <span className="relative h-11 w-11 overflow-hidden rounded-lg border border-white/15 bg-white">
                   <CatalogImage
                     src={brand.logoImage}
-                    alt={`Logo ${brand.name}`}
+                    alt={`Logo ${brandName}`}
                     className="h-full w-full object-cover"
-                    fallback={{ style: 'institutional', seed: 'footer-brand-logo', label: brand.shortName || brand.name }}
+                    fallback={{ style: 'institutional', seed: 'footer-brand-logo', label: brandShortName || brandName }}
                   />
                 </span>
               ) : null}
               <div>
-                <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-white">{brand.name}</h3>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-gray-500">{brand.tagline}</p>
+                <h3 className="text-lg font-semibold uppercase tracking-[0.2em] text-white">{brandName}</h3>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-gray-500">{brandTagline}</p>
               </div>
             </div>
 
-            <p className="mt-5 text-sm leading-relaxed text-gray-400">{brand.signature}</p>
+            <p className="mt-5 text-sm leading-relaxed text-gray-400">{brandSignature}</p>
 
-            {brand.instagramUrl && (
+            {hasInstagram && (
               <div className="mt-5 flex space-x-3">
                 <a
-                  href={brand.instagramUrl}
+                  href={instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={socialLinkClassName}
-                  aria-label="Instagram"
+                  aria-label={`Instagram ${instagramHandle}`}
+                  title={instagramHandle}
                 >
                   <Instagram className="h-[18px] w-[18px]" />
                 </a>
@@ -94,10 +152,9 @@ export const Footer: React.FC = () => {
           <div className="premium-reveal premium-reveal-delay-2">
             <h4 className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Assinatura</h4>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li>Modelagens orientadas por caimento real.</li>
-              <li>Lavagens autorais com visual sofisticado.</li>
-              <li>Atendimento consultivo e humano.</li>
-              <li>Marca com linguagem comercial elegante.</li>
+              {signatureItems.map((item, index) => (
+                <li key={`${item}-${index}`}>{item}</li>
+              ))}
             </ul>
             <a
               href={footerWhatsAppHref}
@@ -106,7 +163,7 @@ export const Footer: React.FC = () => {
               className="premium-focus premium-interactive mt-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:-translate-y-px hover:bg-white/10 focus-visible:ring-white"
             >
               <WhatsAppLogo className="h-4 w-4" />
-              Tirar duvidas no WhatsApp
+              {footerCtaLabel}
               <ArrowRight className="h-4 w-4" />
             </a>
           </div>
@@ -118,22 +175,22 @@ export const Footer: React.FC = () => {
                 <li className="flex items-start">
                   <MapPin className="mr-3 mt-0.5 h-5 w-5 shrink-0 text-gray-500" />
                   <span>
-                    {brand.addressLine1}
-                    {brand.addressLine1 && brand.addressLine2 ? <br /> : null}
-                    {brand.addressLine2}
+                    {addressLine1}
+                    {addressLine1 && addressLine2 ? <br /> : null}
+                    {addressLine2}
                   </span>
                 </li>
               )}
-              {brand.whatsappDisplay && (
+              {whatsappDisplay && (
                 <li className="flex items-center">
                   <Phone className="mr-3 h-5 w-5 shrink-0 text-gray-500" />
-                  <span>{brand.whatsappDisplay}</span>
+                  <span>{whatsappDisplay}</span>
                 </li>
               )}
-              {brand.contactEmail && (
+              {contactEmail && (
                 <li className="flex items-center">
                   <Mail className="mr-3 h-5 w-5 shrink-0 text-gray-500" />
-                  <span>{brand.contactEmail}</span>
+                  <span>{contactEmail}</span>
                 </li>
               )}
             </ul>
@@ -142,7 +199,7 @@ export const Footer: React.FC = () => {
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-800 pt-8 text-xs text-gray-500 md:flex-row">
           <p>
-            &copy; {new Date().getFullYear()} {brand.name}. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} {brandName}. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4">
             <a href="#" className={footerLinkClassName}>

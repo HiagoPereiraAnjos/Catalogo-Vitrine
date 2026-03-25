@@ -1,5 +1,6 @@
-import { FileUp, Layers3, LockKeyhole, Plus, ShieldCheck, WandSparkles } from 'lucide-react';
+﻿import { FileUp, Layers3, LockKeyhole, Plus, ShieldCheck, WandSparkles } from 'lucide-react';
 import { Button } from '../../../components/Button';
+import { useSiteSettings } from '../../../hooks/useSiteSettings';
 
 interface AdminHeaderProps {
   onExit: () => void;
@@ -16,17 +17,20 @@ export const AdminHeader = ({
   onOpenBulkImport,
   onOpenProduct
 }: AdminHeaderProps) => {
+  const { settings } = useSiteSettings();
+  const brandName = settings.brand.name;
+
   return (
     <section className="premium-reveal overflow-hidden rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-[0_26px_56px_-40px_rgba(15,23,42,0.8)]">
       <div className="flex flex-col gap-6 p-7 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.12em]">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Área reservada
+            Area reservada
           </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Painel administrativo</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-200">
-            Gestão visual do catálogo com foco em curadoria, organização e consistência de marca.
+            Gestao visual do catalogo {brandName} com foco em curadoria, organizacao e consistencia de marca.
           </p>
         </div>
 
@@ -38,7 +42,7 @@ export const AdminHeader = ({
             type="button"
           >
             <LockKeyhole className="h-4 w-4" />
-            Sair da área reservada
+            Sair da area reservada
           </Button>
           <Button
             variant="light"

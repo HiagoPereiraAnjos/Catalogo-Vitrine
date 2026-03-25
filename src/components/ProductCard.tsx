@@ -84,7 +84,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
           <div className="mb-2 flex items-start justify-between gap-4">
             <h3
               id={titleId}
-              className="line-clamp-2 text-base font-semibold tracking-tight text-gray-900 transition-colors group-hover:text-blue-700"
+              className="line-clamp-2 text-base font-semibold tracking-tight text-gray-900 transition-colors group-hover:text-[var(--theme-primary)]"
               itemProp="name"
             >
               {product.name}
@@ -98,7 +98,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
             {product.collection && (
               <>
                 <span>/</span>
-                <span className="uppercase tracking-[0.14em] text-indigo-600">{product.collection}</span>
+                <span className="uppercase tracking-[0.14em] text-[var(--theme-primary)]">{product.collection}</span>
               </>
             )}
           </div>

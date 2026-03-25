@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { Layers3, Trash2 } from 'lucide-react';
+import { Layers3, Package, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { categories as baseCategories, genders } from '../data';
 import { Product, ProductCreateInput } from '../types';
@@ -25,15 +25,17 @@ import {
   AdminHeader,
   AdminNoticeToast,
   AdminStatsCards,
-  BrandSettingsPanel,
   BulkImportModal,
   CollectionActions,
   CollectionWizard,
   ConfirmDialog,
   ProductEditor,
-  ProductsList
+  ProductsList,
+  SiteCustomizationPanel
 } from './admin/components';
 import { AdminStatusFilter, CollectionOption, FormErrors, Notice, ProductFormState } from './admin/types';
+
+type AdminWorkspaceView = 'catalog' | 'customization';
 
 const getInitialFormData = (defaultCategory: string = baseCategories[1] || 'CalÃ§as'): ProductFormState => ({
   name: '',
@@ -310,6 +312,7 @@ export default function AdminDashboard() {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [adminSearch, setAdminSearch] = useState('');
   const [adminStatusFilter, setAdminStatusFilter] = useState<AdminStatusFilter>('all');
+  const [workspaceView, setWorkspaceView] = useState<AdminWorkspaceView>('catalog');
   const [featuredImageDraft, setFeaturedImageDraft] = useState<UploadDraftImage | null>(null);
   const [galleryImageDrafts, setGalleryImageDrafts] = useState<UploadDraftImage[]>([]);
   const [persistedGalleryImageRefs, setPersistedGalleryImageRefs] = useState<string[]>([]);
@@ -1243,10 +1246,22 @@ export default function AdminDashboard() {
 
       <AdminHeader
         onExit={() => setIsAuthenticated(false)}
-        onOpenCategory={openCategoryModal}
-        onOpenCollectionWizard={() => setIsCollectionWizardOpen(true)}
-        onOpenBulkImport={() => setIsBulkImportOpen(true)}
-        onOpenProduct={() => openForm()}
+        onOpenCategory={() => {
+          setWorkspaceView('catalog');
+          openCategoryModal();
+        }}
+        onOpenCollectionWizard={() => {
+          setWorkspaceView('catalog');
+          setIsCollectionWizardOpen(true);
+        }}
+        onOpenBulkImport={() => {
+          setWorkspaceView('catalog');
+          setIsBulkImportOpen(true);
+        }}
+        onOpenProduct={() => {
+          setWorkspaceView('catalog');
+          openForm();
+        }}
       />
 
       <AdminStatsCards
@@ -1256,25 +1271,76 @@ export default function AdminDashboard() {
         categoriesCount={categoriesCount}
       />
 
-      <BrandSettingsPanel />
+      <section className="premium-reveal rounded-2xl border border-gray-200 bg-white p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.6)] md:p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Area de trabalho</p>
+        <div className="mt-3 grid gap-2 md:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => setWorkspaceView('catalog')}
+            aria-pressed={workspaceView === 'catalog'}
+            className={`premium-focus premium-interactive rounded-xl border px-4 py-3 text-left transition ${
+              workspaceView === 'catalog'
+                ? 'border-gray-900 bg-gray-900 text-white'
+                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <Package className="h-4 w-4" />
+              Gestao de produtos
+            </span>
+            <span className={`mt-1 block text-xs ${workspaceView === 'catalog' ? 'text-gray-200' : 'text-gray-500'}`}>
+              Editar, duplicar e excluir itens do catalogo.
+            </span>
+          </button>
 
-      <CollectionActions
-        collections={collectionOptions}
-        isDuplicating={isDuplicatingCollection}
-        onDuplicateCollection={handleDuplicateCollection}
-      />
+          <button
+            type="button"
+            onClick={() => setWorkspaceView('customization')}
+            aria-pressed={workspaceView === 'customization'}
+            className={`premium-focus premium-interactive rounded-xl border px-4 py-3 text-left transition ${
+              workspaceView === 'customization'
+                ? 'border-gray-900 bg-gray-900 text-white'
+                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <SlidersHorizontal className="h-4 w-4" />
+              Personalizacao do site
+            </span>
+            <span
+              className={`mt-1 block text-xs ${
+                workspaceView === 'customization' ? 'text-gray-200' : 'text-gray-500'
+              }`}
+            >
+              Marca, Home, Sobre, Contato, SEO e aparencia.
+            </span>
+          </button>
+        </div>
+      </section>
 
-      <ProductsList
-        products={filteredProducts}
-        searchQuery={adminSearch}
-        statusFilter={adminStatusFilter}
-        onSearchChange={setAdminSearch}
-        onStatusFilterChange={setAdminStatusFilter}
-        onEdit={(product) => openForm(product)}
-        onDelete={(product) => setPendingDeleteProduct(product)}
-        onCreateProduct={() => openForm()}
-        onCreateCollection={() => setIsCollectionWizardOpen(true)}
-      />
+      {workspaceView === 'customization' ? (
+        <SiteCustomizationPanel />
+      ) : (
+        <>
+          <CollectionActions
+            collections={collectionOptions}
+            isDuplicating={isDuplicatingCollection}
+            onDuplicateCollection={handleDuplicateCollection}
+          />
+
+          <ProductsList
+            products={filteredProducts}
+            searchQuery={adminSearch}
+            statusFilter={adminStatusFilter}
+            onSearchChange={setAdminSearch}
+            onStatusFilterChange={setAdminStatusFilter}
+            onEdit={(product) => openForm(product)}
+            onDelete={(product) => setPendingDeleteProduct(product)}
+            onCreateProduct={() => openForm()}
+            onCreateCollection={() => setIsCollectionWizardOpen(true)}
+          />
+        </>
+      )}
 
       <Modal
         isOpen={isCategoryModalOpen}
@@ -1441,6 +1507,8 @@ export default function AdminDashboard() {
     </Container>
   );
 }
+
+
 
 
 

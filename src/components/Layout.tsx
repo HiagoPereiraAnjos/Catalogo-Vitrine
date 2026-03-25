@@ -6,6 +6,8 @@ import { buildWhatsAppHref } from '../utils/whatsapp';
 import { WhatsAppLogo } from './icons/WhatsAppLogo';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import { ImageStorageService } from '../services/imageStorageService';
+import { applyAppearanceTheme } from '../utils/appearanceTheme';
+import { defaultSiteSettings } from '../data/defaultSiteSettings';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,12 +17,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { settings } = useSiteSettings();
   const brand = settings.brand;
+  const contact = settings.contact;
   const shouldShowFloatingWhatsApp = !location.pathname.startsWith('/admin');
   const floatingWhatsAppHref = buildWhatsAppHref({
     context: 'floating',
     routePath: location.pathname,
     intent: 'general'
   });
+  const floatingHint = contact.ctaDescription || defaultSiteSettings.contact.ctaDescription;
+  const floatingLabel = contact.primaryCtaLabel || defaultSiteSettings.contact.primaryCtaLabel;
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -29,6 +34,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [location.pathname]);
+
+  useEffect(() => {
+    applyAppearanceTheme(settings.appearance);
+  }, [settings.appearance]);
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -93,10 +102,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           rel="noopener noreferrer"
           className="group fixed right-4 z-50 premium-reveal premium-reveal-delay-2"
           style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-          aria-label="Falar no WhatsApp"
+          aria-label={`Falar no WhatsApp ${contact.whatsappDisplay || ''}`.trim()}
         >
           <span className="pointer-events-none absolute bottom-[calc(100%+0.75rem)] right-2 hidden whitespace-nowrap rounded-full bg-gray-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 lg:block">
-            Atendimento imediato
+            {floatingHint}
           </span>
           <span
             className="absolute -inset-1 rounded-full bg-green-500/25 blur-md opacity-80 transition-opacity duration-200 group-hover:opacity-100"
@@ -105,7 +114,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           />
           <span className="premium-interactive premium-focus relative inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full border border-green-500/60 bg-green-600 text-white shadow-[0_18px_35px_-24px_rgba(22,163,74,0.9)] hover:-translate-y-0.5 hover:bg-green-700 focus-visible:ring-green-500 focus-visible:ring-offset-2 sm:h-auto sm:w-auto sm:px-5 sm:py-3">
             <WhatsAppLogo className="h-5 w-5" />
-            <span className="hidden text-sm font-semibold sm:inline">Falar agora</span>
+            <span className="hidden text-sm font-semibold sm:inline">{floatingLabel}</span>
           </span>
         </a>
       )}

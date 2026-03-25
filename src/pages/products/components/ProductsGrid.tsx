@@ -43,14 +43,22 @@ export const ProductsGrid = ({ products, isLoading, activeFilters, onClearFilter
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.2 }}
-              className={`badge-chip premium-chip ${hasActiveFilters ? 'border-blue-100 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600'}`}
+              className={`badge-chip premium-chip ${
+                hasActiveFilters
+                  ? 'border-[rgba(var(--theme-primary-rgb),0.25)] bg-[rgba(var(--theme-highlight-rgb),0.55)] text-[var(--theme-primary)]'
+                  : 'border-gray-200 bg-white text-gray-600'
+              }`}
             >
               {label}
             </motion.span>
           ))}
         </AnimatePresence>
         {hasActiveFilters && (
-          <button type="button" onClick={onClearFilters} className="premium-interactive ml-1 text-sm font-medium text-blue-700 hover:text-blue-900">
+          <button
+            type="button"
+            onClick={onClearFilters}
+            className="premium-interactive ml-1 text-sm font-medium text-[var(--theme-primary)] hover:text-[var(--theme-primary-strong)]"
+          >
             Limpar tudo
           </button>
         )}

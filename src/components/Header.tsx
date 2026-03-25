@@ -32,7 +32,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur-xl" style={{ borderColor: 'var(--brand-border)' }}>
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-10">
         <div className="flex h-16 items-center justify-between gap-4 md:h-20">
           <Link
@@ -51,7 +51,7 @@ export default function Header() {
               </span>
             ) : null}
             <div className="flex flex-col">
-              <span className="text-sm font-semibold uppercase tracking-[0.22em] text-gray-900">{brand.name}</span>
+              <span className="text-sm font-semibold uppercase tracking-[0.22em] theme-text-primary">{brand.name}</span>
               <p className="hidden text-[11px] uppercase tracking-[0.14em] text-gray-500 lg:block">{brand.tagline}</p>
             </div>
           </Link>
@@ -63,9 +63,7 @@ export default function Header() {
                 to={item.to}
                 className={({ isActive }) =>
                   `premium-focus premium-interactive rounded-full px-3.5 py-1.5 text-sm font-medium focus-visible:ring-gray-900 ${
-                    isActive
-                      ? 'bg-gray-900 text-white shadow-[0_8px_24px_-18px_rgba(15,23,42,0.8)]'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    isActive ? 'nav-pill-active' : 'nav-pill-idle'
                   }`
                 }
               >
@@ -93,7 +91,7 @@ export default function Header() {
           <div className="hidden items-center md:flex">
             <Link
               to="/admin"
-              className="premium-focus premium-interactive rounded-full border border-transparent p-2 text-gray-500 hover:border-gray-200 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-900"
+              className="premium-focus premium-interactive rounded-full border border-transparent p-2 text-gray-500 hover:border-[var(--brand-border)] hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
               aria-label="Area administrativa"
             >
               <Settings className="h-5 w-5" />
@@ -103,14 +101,14 @@ export default function Header() {
           <div className="flex items-center space-x-2 md:hidden">
             <Link
               to="/admin"
-              className="premium-focus premium-interactive rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-900"
+              className="premium-focus premium-interactive rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
               aria-label="Painel de administracao"
             >
               <Settings className="h-5 w-5" />
             </Link>
             <button
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              className="premium-focus premium-interactive rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-900"
+              className="premium-focus premium-interactive rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
               aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={isMobileMenuOpen}
               type="button"
@@ -128,6 +126,7 @@ export default function Header() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden border-t border-gray-100 bg-white/95 backdrop-blur md:hidden"
+            style={{ borderColor: 'var(--brand-border)' }}
           >
             <div className="space-y-4 px-4 py-4">
               <form onSubmit={handleSearch} className="group relative">
@@ -152,9 +151,12 @@ export default function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={({ isActive }) =>
                       `premium-interactive rounded-xl px-2.5 py-3 text-base font-medium ${
-                        isActive ? 'bg-gray-900 text-white' : 'text-gray-900 hover:bg-gray-50'
+                        isActive
+                          ? 'text-white'
+                          : 'text-gray-900 hover:bg-[rgba(var(--theme-primary-rgb),0.08)] hover:text-[var(--theme-primary)]'
                       }`
                     }
+                    style={({ isActive }) => (isActive ? { backgroundColor: 'var(--theme-primary)' } : undefined)}
                   >
                     {item.label}
                   </NavLink>

@@ -1,5 +1,5 @@
 ﻿import { buildWaMeLink } from '../config/whatsapp';
-import { getBrandSettingsSnapshot } from './siteBrand';
+import { getBrandSettingsSnapshot, getContactSettingsSnapshot } from './siteBrand';
 
 export type WhatsAppContext = 'home' | 'product' | 'contact' | 'floating';
 export type WhatsAppIntent = 'hero' | 'curation' | 'size-help' | 'product-details' | 'contact-form' | 'general';
@@ -103,24 +103,32 @@ export const buildWhatsAppMessage = (params: WhatsAppMessageParams) => {
 };
 
 const resolveWhatsAppBaseLink = () => {
-  const rawUrl = getBrandSettingsSnapshot().whatsappUrl.trim();
-  if (!rawUrl) {
-    return undefined;
-  }
+  const contact = getContactSettingsSnapshot();
+  const brand = getBrandSettingsSnapshot();
+  const candidates = [contact.whatsappUrl, brand.whatsappUrl];
 
-  const normalizedValue = rawUrl.includes('://') ? rawUrl : `https://${rawUrl}`;
-  const cleanValue = normalizedValue.split('?')[0];
-
-  try {
-    const parsed = new URL(cleanValue);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return undefined;
+  for (const candidate of candidates) {
+    const rawUrl = candidate.trim();
+    if (!rawUrl) {
+      continue;
     }
 
-    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
-  } catch {
-    return undefined;
+    const normalizedValue = rawUrl.includes('://') ? rawUrl : `https://${rawUrl}`;
+    const cleanValue = normalizedValue.split('?')[0];
+
+    try {
+      const parsed = new URL(cleanValue);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        continue;
+      }
+
+      return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
+    } catch {
+      continue;
+    }
   }
+
+  return undefined;
 };
 
 export const buildWhatsAppHref = (params: WhatsAppMessageParams) => {
