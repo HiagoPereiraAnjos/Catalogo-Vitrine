@@ -2,11 +2,13 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Container } from './components/Container';
 import { Layout } from './components/Layout';
+import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 
 const Home = lazy(() => import('./pages/Home'));
 const Products = lazy(() => import('./pages/Products'));
 const ProductDetails = lazy(() => import('./pages/ProductDetails').then((module) => ({ default: module.ProductDetails })));
+const Cart = lazy(() => import('./pages/Cart'));
 const About = lazy(() => import('./pages/About'));
 const Contact = lazy(() => import('./pages/Contact'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -32,21 +34,23 @@ const PageLoadingFallback = () => (
 export default function App() {
   return (
     <ProductProvider>
-      <BrowserRouter>
-        <Layout>
-          <Suspense fallback={<PageLoadingFallback />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/produtos" element={<Products />} />
-              <Route path="/produto/:id" element={<ProductDetails />} />
-              <Route path="/sobre" element={<About />} />
-              <Route path="/contato" element={<Contact />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
-          </Suspense>
-        </Layout>
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <Layout>
+            <Suspense fallback={<PageLoadingFallback />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/produtos" element={<Products />} />
+                <Route path="/produto/:id" element={<ProductDetails />} />
+                <Route path="/sacola" element={<Cart />} />
+                <Route path="/sobre" element={<About />} />
+                <Route path="/contato" element={<Contact />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+              </Routes>
+            </Suspense>
+          </Layout>
+        </BrowserRouter>
+      </CartProvider>
     </ProductProvider>
   );
 }
-

@@ -1,13 +1,14 @@
 ﻿import React, { useState } from 'react';
-import { Search, Settings, Menu, X } from 'lucide-react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Search, Settings, Menu, ShoppingBag, X } from 'lucide-react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
+import { useCart } from '../context/CartContext';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import { CatalogImage } from './CatalogImage';
 
 const navItems = [
-  { to: '/', label: 'Inicio' },
-  { to: '/produtos', label: 'Colecao' },
+  { to: '/', label: 'Início' },
+  { to: '/produtos', label: 'Coleção' },
   { to: '/sobre', label: 'Sobre' },
   { to: '/contato', label: 'Contato' }
 ];
@@ -16,8 +17,11 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { totalItems, openCart } = useCart();
   const { settings } = useSiteSettings();
   const brand = settings.brand;
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
@@ -31,6 +35,11 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   };
 
+  const handleOpenCart = () => {
+    openCart();
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur-xl" style={{ borderColor: 'var(--brand-border)' }}>
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-10">
@@ -38,7 +47,7 @@ export default function Header() {
           <Link
             to="/"
             className="premium-focus premium-interactive flex shrink-0 items-center gap-2 rounded-sm focus-visible:ring-gray-900"
-            aria-label={`Pagina inicial ${brand.name}`}
+            aria-label={`Página inicial ${brand.name}`}
           >
             {brand.logoImage ? (
               <span className="relative h-10 w-10 overflow-hidden rounded-md border border-gray-200 bg-white">
@@ -56,7 +65,7 @@ export default function Header() {
             </div>
           </Link>
 
-          <nav className="hidden items-center space-x-2 md:flex" aria-label="Navegacao principal">
+          <nav className="hidden items-center space-x-2 md:flex" aria-label="Navegação principal">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -88,21 +97,52 @@ export default function Header() {
             </form>
           </div>
 
-          <div className="hidden items-center md:flex">
+          <div className="hidden items-center gap-2 md:flex">
+            {!isAdminRoute && (
+              <button
+                type="button"
+                onClick={handleOpenCart}
+                className="premium-focus premium-interactive relative inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-2 text-gray-500 hover:border-[var(--brand-border)] hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
+                aria-label={totalItems > 0 ? `Abrir sacola com ${totalItems} item(ns)` : 'Abrir sacola'}
+              >
+                <ShoppingBag className="h-5 w-5" />
+                <span className="hidden text-sm font-semibold lg:inline">Sacola</span>
+                {totalItems > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--theme-primary)] px-1.5 text-[10px] font-semibold text-white">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </button>
+            )}
             <Link
               to="/admin"
               className="premium-focus premium-interactive rounded-full border border-transparent p-2 text-gray-500 hover:border-[var(--brand-border)] hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
-              aria-label="Area administrativa"
+              aria-label="Área administrativa"
             >
               <Settings className="h-5 w-5" />
             </Link>
           </div>
 
           <div className="flex items-center space-x-2 md:hidden">
+            {!isAdminRoute && (
+              <button
+                type="button"
+                onClick={handleOpenCart}
+                className="premium-focus premium-interactive relative rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
+                aria-label={totalItems > 0 ? `Abrir sacola com ${totalItems} item(ns)` : 'Abrir sacola'}
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -right-1 -top-1 inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--theme-primary)] px-1.5 text-[10px] font-semibold text-white">
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </button>
+            )}
             <Link
               to="/admin"
               className="premium-focus premium-interactive rounded-full p-2 text-gray-600 hover:bg-gray-100 hover:text-[var(--theme-primary)] focus-visible:ring-gray-900"
-              aria-label="Painel de administracao"
+              aria-label="Painel de administração"
             >
               <Settings className="h-5 w-5" />
             </Link>
@@ -143,7 +183,7 @@ export default function Header() {
                 />
               </form>
 
-              <nav className="flex flex-col space-y-2 pb-4" aria-label="Menu mobile">
+              <nav className="flex flex-col space-y-2 pb-4" aria-label="Menu móvel">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.to}
@@ -162,6 +202,22 @@ export default function Header() {
                   </NavLink>
                 ))}
               </nav>
+
+              {!isAdminRoute && (
+                <button
+                  type="button"
+                  onClick={handleOpenCart}
+                  className="premium-focus premium-interactive flex w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-900"
+                >
+                  <ShoppingBag className="h-4 w-4" />
+                  Sacola
+                  {totalItems > 0 && (
+                    <span className="rounded-full bg-[var(--theme-primary)] px-2 py-0.5 text-xs font-semibold text-white">
+                      {totalItems > 99 ? '99+' : totalItems}
+                    </span>
+                  )}
+                </button>
+              )}
             </div>
           </motion.div>
         )}

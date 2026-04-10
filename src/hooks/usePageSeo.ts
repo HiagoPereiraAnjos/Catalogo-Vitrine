@@ -17,7 +17,7 @@ interface PageSeoOptions {
 
 const DEFAULT_OG_IMAGE =
   'https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop';
-const DEFAULT_KEYWORDS = 'jeans premium, catalogo digital, moda jeans, denim';
+const DEFAULT_KEYWORDS = 'jeans premium, catálogo digital, moda jeans, denim';
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '');
 

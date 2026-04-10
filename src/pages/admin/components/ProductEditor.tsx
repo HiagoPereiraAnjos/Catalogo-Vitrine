@@ -20,6 +20,7 @@ interface ProductEditorProps {
   maxImageCount: number;
   totalImageCount: number;
   uploadedGalleryCount: number;
+  localGalleryCount: number;
   hasFeaturedUploadDraft: boolean;
   isUploadPreparing: boolean;
   uploadPrepareCompleted: number;
@@ -45,9 +46,9 @@ interface ProductEditorProps {
 }
 
 const stockStatusOptions = [
-  { value: 'in_stock', label: 'Disponivel' },
-  { value: 'low_stock', label: 'Ultimas unidades' },
-  { value: 'out_of_stock', label: 'Indisponivel' }
+  { value: 'in_stock', label: 'Disponível' },
+  { value: 'low_stock', label: 'Últimas unidades' },
+  { value: 'out_of_stock', label: 'Indisponível' }
 ] as const;
 
 export const ProductEditor = ({
@@ -64,6 +65,7 @@ export const ProductEditor = ({
   maxImageCount,
   totalImageCount,
   uploadedGalleryCount,
+  localGalleryCount,
   hasFeaturedUploadDraft,
   isUploadPreparing,
   uploadPrepareCompleted,
@@ -94,7 +96,7 @@ export const ProductEditor = ({
       isOpen={isOpen}
       onClose={onClose}
       title={isEditing ? 'Editar produto' : 'Novo produto'}
-      description="Fluxo guiado: preencha dados basicos, adicione fotos e salve."
+      description="Fluxo guiado: preencha dados básicos, adicione fotos e salve."
       maxWidthClassName="sm:max-w-6xl"
       bodyClassName="p-0"
     >
@@ -102,15 +104,15 @@ export const ProductEditor = ({
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Cadastro guiado</p>
           <div className="mt-2 grid gap-2 sm:grid-cols-3">
-            <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">1. Dados basicos</div>
-            <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">2. Midia do produto</div>
+            <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">1. Dados básicos</div>
+            <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">2. Mídia do produto</div>
             <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700">3. Revisar e salvar</div>
           </div>
         </section>
 
         <ProductFormSection
-          title="Dados basicos"
-          description="Obrigatorio apenas: nome e preco. Os demais campos podem ser preenchidos depois."
+          title="Dados básicos"
+          description="Obrigatório apenas: nome e preço. Os demais campos podem ser preenchidos depois."
         >
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="lg:col-span-2">
@@ -119,14 +121,14 @@ export const ProductEditor = ({
                 type="text"
                 value={formData.name}
                 onChange={(event) => onFieldChange('name', event.target.value)}
-                placeholder="Ex: Calca Jeans Skinny"
+                placeholder="Ex: Calça Jeans Skinny"
                 className={getFieldClassName(Boolean(formErrors.name))}
               />
               {formErrors.name && <p className="mt-1 text-xs text-red-600">{formErrors.name}</p>}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Preco (R$) *</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Preço (R$) *</label>
               <input
                 type="number"
                 min="0"
@@ -145,7 +147,7 @@ export const ProductEditor = ({
                 type="text"
                 value={formData.sku}
                 onChange={(event) => onFieldChange('sku', event.target.value)}
-                placeholder="Se vazio, sera gerado automatico"
+                placeholder="Se vazio, será gerado automático"
                 className={getFieldClassName(Boolean(formErrors.sku))}
               />
               {formErrors.sku && <p className="mt-1 text-xs text-red-600">{formErrors.sku}</p>}
@@ -168,7 +170,7 @@ export const ProductEditor = ({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Genero</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Gênero</label>
               <select
                 value={formData.gender}
                 onChange={(event) => onFieldChange('gender', event.target.value)}
@@ -184,7 +186,7 @@ export const ProductEditor = ({
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Colecao</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Coleção</label>
               <input
                 type="text"
                 value={formData.collection}
@@ -208,12 +210,12 @@ export const ProductEditor = ({
             </div>
 
             <div className="md:col-span-2 lg:col-span-4">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descricao (opcional)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descrição (opcional)</label>
               <textarea
                 rows={3}
                 value={formData.description}
                 onChange={(event) => onFieldChange('description', event.target.value)}
-                placeholder="Se deixar em branco, uma descricao simples sera gerada automaticamente."
+                placeholder="Se deixar em branco, uma descrição simples será gerada automaticamente."
                 className={getFieldClassName(Boolean(formErrors.description))}
               />
               {formErrors.description && <p className="mt-1 text-xs text-red-600">{formErrors.description}</p>}
@@ -222,7 +224,7 @@ export const ProductEditor = ({
         </ProductFormSection>
 
         <ProductFormSection
-          title="Midia"
+          title="Mídia"
           description="Adicione fotos por upload ou URL. O sistema organiza imagem principal e galeria."
         >
           <ProductImageManager
@@ -235,6 +237,7 @@ export const ProductEditor = ({
             maxImageCount={maxImageCount}
             totalImageCount={totalImageCount}
             uploadedGalleryCount={uploadedGalleryCount}
+            localGalleryCount={localGalleryCount}
             hasFeaturedUploadDraft={hasFeaturedUploadDraft}
             isUploadPreparing={isUploadPreparing}
             uploadPrepareCompleted={uploadPrepareCompleted}
@@ -258,8 +261,8 @@ export const ProductEditor = ({
         </ProductFormSection>
 
         <ProductFormSection
-          title="Variacoes e colecao"
-          description="Defina tamanhos, cores, status e selos comerciais para exibir no catalogo."
+          title="Variações e coleção"
+          description="Defina tamanhos, cores, status e selos comerciais para exibir no catálogo."
         >
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div>
@@ -310,7 +313,7 @@ export const ProductEditor = ({
                   type="text"
                   value={formData.label}
                   onChange={(event) => onFieldChange('label', event.target.value)}
-                  placeholder="Ex: Nova colecao"
+                  placeholder="Ex: Nova coleção"
                   className={`${getFieldClassName(Boolean(formErrors.label))} pl-9`}
                 />
               </div>
@@ -326,7 +329,7 @@ export const ProductEditor = ({
                 onChange={(event) => onFieldChange('isFeatured', event.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              Destacar no catalogo
+              Destacar no catálogo
             </label>
 
             <label className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
@@ -343,10 +346,10 @@ export const ProductEditor = ({
 
         <ProductFormSection
           title="Detalhes opcionais"
-          description="Use apenas se quiser enriquecer a pagina do produto."
+          description="Use apenas se quiser enriquecer a página do produto."
         >
           <details className="rounded-xl border border-gray-200 bg-white p-3" open={false}>
-            <summary className="cursor-pointer text-sm font-medium text-gray-700">Mostrar campos avancados</summary>
+            <summary className="cursor-pointer text-sm font-medium text-gray-700">Mostrar campos avançados</summary>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-gray-700">Slug (opcional)</label>
@@ -366,9 +369,10 @@ export const ProductEditor = ({
                   type="text"
                   value={formData.fit}
                   onChange={(event) => onFieldChange('fit', event.target.value)}
-                  placeholder="Ex: Slim com conforto"
+                  placeholder="Ex: Slim com conforto | Reta | Wide"
                   className={getFieldClassName(Boolean(formErrors.fit))}
                 />
+                <p className="mt-1 text-xs text-gray-500">Use `|` para oferecer mais de uma modelagem na página da peça.</p>
                 {formErrors.fit && <p className="mt-1 text-xs text-red-600">{formErrors.fit}</p>}
               </div>
 
@@ -385,12 +389,12 @@ export const ProductEditor = ({
               </div>
 
               <div className="md:col-span-3 lg:col-span-1">
-                <label className="mb-1.5 block text-sm font-medium text-gray-700">Composicao</label>
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">Composição</label>
                 <input
                   type="text"
                   value={formData.composition}
                   onChange={(event) => onFieldChange('composition', event.target.value)}
-                  placeholder="Ex: 98% algodao, 2% elastano"
+                  placeholder="Ex: 98% algodão, 2% elastano"
                   className={getFieldClassName(Boolean(formErrors.composition))}
                 />
                 {formErrors.composition && <p className="mt-1 text-xs text-red-600">{formErrors.composition}</p>}
@@ -416,7 +420,7 @@ export const ProductEditor = ({
                   rows={3}
                   value={formData.careInstructions}
                   onChange={(event) => onFieldChange('careInstructions', event.target.value)}
-                  placeholder={'- Lavar do avesso\n- Secar a sombra'}
+                  placeholder={'- Lavar do avesso\n- Secar à sombra'}
                   className={getFieldClassName(Boolean(formErrors.careInstructions))}
                 />
                 {formErrors.careInstructions && <p className="mt-1 text-xs text-red-600">{formErrors.careInstructions}</p>}
@@ -434,7 +438,7 @@ export const ProductEditor = ({
                   {isPersistingUploads ? 'Salvando imagens e produto...' : 'Salvando produto...'}
                 </span>
               ) : (
-                'Dica: voce pode salvar com poucos campos e completar depois.'
+                'Dica: você pode salvar com poucos campos e completar depois.'
               )}
             </div>
 
@@ -443,7 +447,7 @@ export const ProductEditor = ({
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSaving || hasInvalidPreviewImage}>
-                {isSaving ? 'Salvando...' : isEditing ? 'Salvar alteracoes' : 'Salvar produto'}
+                {isSaving ? 'Salvando...' : isEditing ? 'Salvar alterações' : 'Salvar produto'}
               </Button>
             </div>
           </div>

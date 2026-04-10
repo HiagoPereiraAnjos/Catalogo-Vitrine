@@ -1,5 +1,5 @@
 ﻿import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload } from 'lucide-react';
+import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { defaultSiteSettings } from '../../../data/defaultSiteSettings';
@@ -7,6 +7,7 @@ import { useSiteSettings } from '../../../hooks/useSiteSettings';
 import { ImageStorageService } from '../../../services/imageStorageService';
 import { SiteSeoSettings } from '../../../types/siteSettings';
 import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_BYTES,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB,
   isAcceptedImageFileType,
@@ -60,23 +61,23 @@ const sanitizeSeo = (seo: SiteSeoSettings): SiteSeoSettings => ({
 
 const getSeoValidationError = (seo: SiteSeoSettings) => {
   if (seo.institutionalTitle.trim().length < 2) {
-    return 'Informe o titulo institucional padrao da marca.';
+    return 'Informe o título institucional padrão da marca.';
   }
 
   if (seo.home.title.trim().length < 2) {
-    return 'Informe um titulo para SEO da Home.';
+    return 'Informe um título para SEO da Home.';
   }
 
   if (seo.about.title.trim().length < 2) {
-    return 'Informe um titulo para SEO da pagina Sobre.';
+    return 'Informe um título para SEO da página Sobre.';
   }
 
   if (seo.contact.title.trim().length < 2) {
-    return 'Informe um titulo para SEO da pagina Contato.';
+    return 'Informe um título para SEO da página Contato.';
   }
 
   if (seo.defaultDescription.trim().length < 20) {
-    return 'A descricao padrao precisa ter pelo menos 20 caracteres.';
+    return 'A descrição padrão precisa ter pelo menos 20 caracteres.';
   }
 
   if (seo.home.description.trim().length < 20) {
@@ -84,15 +85,15 @@ const getSeoValidationError = (seo: SiteSeoSettings) => {
   }
 
   if (seo.about.description.trim().length < 20) {
-    return 'A meta description da pagina Sobre precisa ter pelo menos 20 caracteres.';
+    return 'A meta description da página Sobre precisa ter pelo menos 20 caracteres.';
   }
 
   if (seo.contact.description.trim().length < 20) {
-    return 'A meta description da pagina Contato precisa ter pelo menos 20 caracteres.';
+    return 'A meta description da página Contato precisa ter pelo menos 20 caracteres.';
   }
 
   if (seo.defaultOgImage.trim() && !isPersistedImageSource(seo.defaultOgImage)) {
-    return 'A imagem de compartilhamento precisa ser uma URL valida, caminho /public ou referencia local.';
+    return 'A imagem de compartilhamento precisa ser uma URL válida, caminho /public ou referência local.';
   }
 
   return null;
@@ -144,7 +145,7 @@ export const SeoSettingsPanel = () => {
     }
 
     if (!isAcceptedImageFileType(file)) {
-      setStatus({ type: 'error', message: `Arquivo "${file.name}" invalido. Use JPG, PNG ou WEBP.` });
+      setStatus({ type: 'error', message: `Arquivo "${file.name}" inválido. Use JPG, PNG ou WEBP.` });
       return;
     }
 
@@ -164,7 +165,10 @@ export const SeoSettingsPanel = () => {
       setStatus({ type: 'success', message: `Imagem "${file.name}" pronta para salvar.` });
     } catch (error) {
       console.error('Falha ao enviar imagem social de SEO', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel processar a imagem de compartilhamento.' });
+      setStatus({
+        type: 'error',
+        message: 'Não foi possível processar a imagem de compartilhamento. Tente JPG, PNG ou WEBP.'
+      });
     } finally {
       setIsUploadingOgImage(false);
     }
@@ -184,10 +188,10 @@ export const SeoSettingsPanel = () => {
     try {
       const payload = sanitizeSeo(formData);
       saveModuleSettings('seo', payload);
-      setStatus({ type: 'success', message: 'Configuracoes de SEO salvas com sucesso.' });
+      setStatus({ type: 'success', message: 'Configurações de SEO salvas com sucesso.' });
     } catch (error) {
-      console.error('Falha ao salvar configuracoes de SEO', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar as configuracoes de SEO.' });
+      console.error('Falha ao salvar configurações de SEO', error);
+      setStatus({ type: 'error', message: 'Não foi possível salvar as configurações de SEO.' });
     } finally {
       setIsSaving(false);
     }
@@ -195,7 +199,7 @@ export const SeoSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.seo);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   const ogImagePreview = formData.defaultOgImage || defaultSiteSettings.seo.defaultOgImage;
@@ -206,7 +210,7 @@ export const SeoSettingsPanel = () => {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">SEO</p>
           <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Metadados do site</h2>
-          <p className="mt-1 text-sm text-gray-600">Configure titulos, descricoes e imagem de compartilhamento sem alterar codigo.</p>
+          <p className="mt-1 text-sm text-gray-600">Configure títulos, descrições e imagem de compartilhamento sem alterar código.</p>
         </div>
 
         {status && (
@@ -215,7 +219,7 @@ export const SeoSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -223,10 +227,10 @@ export const SeoSettingsPanel = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Padrao institucional</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Padrão institucional</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Titulo institucional padrao da marca</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Título institucional padrão da marca</label>
               <input
                 type="text"
                 value={formData.institutionalTitle}
@@ -237,7 +241,7 @@ export const SeoSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Titulo SEO padrao (fallback)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Título SEO padrão (fallback)</label>
               <input
                 type="text"
                 value={formData.defaultTitle}
@@ -247,7 +251,7 @@ export const SeoSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descricao padrao do site</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descrição padrão do site</label>
               <textarea
                 rows={3}
                 value={formData.defaultDescription}
@@ -263,14 +267,14 @@ export const SeoSettingsPanel = () => {
                 value={formData.primaryKeywords}
                 onChange={(event) => setField('primaryKeywords', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="jeans premium, catalogo digital, moda jeans"
+                placeholder="jeans premium, catálogo digital, moda jeans"
               />
             </div>
           </div>
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Metadados por pagina</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Metadados por página</h3>
           <div className="mt-4 space-y-5">
             <article className="rounded-xl border border-gray-200 bg-white p-4">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Home</p>
@@ -280,7 +284,7 @@ export const SeoSettingsPanel = () => {
                   value={formData.home.title}
                   onChange={(event) => setPageField('home', 'title', event.target.value)}
                   className={getFieldClassName()}
-                  placeholder="Titulo da Home"
+                  placeholder="Título da Home"
                 />
                 <textarea
                   rows={2}
@@ -300,14 +304,14 @@ export const SeoSettingsPanel = () => {
                   value={formData.about.title}
                   onChange={(event) => setPageField('about', 'title', event.target.value)}
                   className={getFieldClassName()}
-                  placeholder="Titulo da pagina Sobre"
+                  placeholder="Título da página Sobre"
                 />
                 <textarea
                   rows={2}
                   value={formData.about.description}
                   onChange={(event) => setPageField('about', 'description', event.target.value)}
                   className={getFieldClassName()}
-                  placeholder="Meta description da pagina Sobre"
+                  placeholder="Meta description da página Sobre"
                 />
               </div>
             </article>
@@ -320,14 +324,14 @@ export const SeoSettingsPanel = () => {
                   value={formData.contact.title}
                   onChange={(event) => setPageField('contact', 'title', event.target.value)}
                   className={getFieldClassName()}
-                  placeholder="Titulo da pagina Contato"
+                  placeholder="Título da página Contato"
                 />
                 <textarea
                   rows={2}
                   value={formData.contact.description}
                   onChange={(event) => setPageField('contact', 'description', event.target.value)}
                   className={getFieldClassName()}
-                  placeholder="Meta description da pagina Contato"
+                  placeholder="Meta description da página Contato"
                 />
               </div>
             </article>
@@ -335,7 +339,7 @@ export const SeoSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Imagem social padrao</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Imagem social padrão</h3>
           <p className="mt-1 text-xs text-gray-500">
             Upload local com IndexedDB ou URL externa. Formatos: JPG, PNG, WEBP (max. {MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB}MB).
           </p>
@@ -346,7 +350,7 @@ export const SeoSettingsPanel = () => {
                 {ogImagePreview ? (
                   <CatalogImage
                     src={ogImagePreview}
-                    alt="Imagem social padrao"
+                    alt="Imagem social padrão"
                     className="h-full w-full object-cover"
                     fallback={{ style: 'institutional', seed: 'seo-og-image', label: 'Imagem social' }}
                   />
@@ -362,7 +366,7 @@ export const SeoSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">URL ou referencia da imagem social</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">URL ou referência da imagem social</label>
               <input
                 type="text"
                 value={formData.defaultOgImage}
@@ -381,7 +385,7 @@ export const SeoSettingsPanel = () => {
                   Upload
                   <input
                     type="file"
-                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                     className="sr-only"
                     disabled={isUploadingOgImage || isSaving}
                     onChange={(event) => {
@@ -403,7 +407,7 @@ export const SeoSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">Os metadados passam a refletir os dados salvos nas paginas principais.</p>
+          <p className="text-xs text-gray-500">Os metadados passam a refletir os dados salvos nas páginas principais.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving || isUploadingOgImage}>

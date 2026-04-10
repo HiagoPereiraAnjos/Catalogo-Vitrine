@@ -86,7 +86,7 @@ export default function Home() {
       if (!collectionMap.has(collectionName)) {
         collectionMap.set(collectionName, {
           name: collectionName,
-          season: product.season || 'Colecao atual',
+          season: product.season || 'Coleção atual',
           image: product.featuredImage,
           count: 0
         });
@@ -146,8 +146,8 @@ export default function Home() {
   const femininePlaceholder = PLACEHOLDER_LIBRARY.audience.feminino[0];
   const highlightsPlaceholder = PLACEHOLDER_LIBRARY.lookbook[0];
   const brandInstitutionalImage =
-    brand.institutionalImage || buildInstitutionalPlaceholder('home-brand-signature', 'Estudio Denim');
-  const institutionalImageLabel = `Estudio ${brand.name}`;
+    brand.institutionalImage || buildInstitutionalPlaceholder('home-brand-signature', 'Estúdio Denim');
+  const institutionalImageLabel = `Estúdio ${brand.name}`;
   const heroSeoImage = isLocalImageRefSource(heroLookbookImage)
     ? PLACEHOLDER_LIBRARY.lookbook[1]
     : heroLookbookImage;
@@ -231,9 +231,9 @@ export default function Home() {
             >
               <CatalogImage
                 src={masculinePlaceholder}
-                alt="Colecao masculina"
+                alt="Coleção masculina"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                fallback={{ style: 'lookbook', seed: 'home-masculino', label: 'Colecao masculina' }}
+                fallback={{ style: 'lookbook', seed: 'home-masculino', label: 'Coleção masculina' }}
               />
               <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/40" />
               <div className="absolute bottom-8 left-8">
@@ -254,9 +254,9 @@ export default function Home() {
             >
               <CatalogImage
                 src={femininePlaceholder}
-                alt="Colecao feminina"
+                alt="Coleção feminina"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                fallback={{ style: 'lookbook', seed: 'home-feminino', label: 'Colecao feminina' }}
+                fallback={{ style: 'lookbook', seed: 'home-feminino', label: 'Coleção feminina' }}
               />
               <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/40" />
               <div className="absolute bottom-8 left-8">
@@ -277,7 +277,7 @@ export default function Home() {
             >
               <CatalogImage
                 src={highlightsPlaceholder}
-                alt="Pecas mais procuradas"
+                alt="Peças mais procuradas"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 fallback={{ style: 'lookbook', seed: 'home-destaques', label: 'Mais procurados' }}
               />
@@ -301,7 +301,7 @@ export default function Home() {
       <section className="section-shell premium-reveal premium-reveal-delay-1" aria-labelledby="home-featured-title">
         <Container>
           <div className="mb-14 flex flex-col items-center text-center">
-            <p className="section-eyebrow mb-3">Selecao da semana</p>
+            <p className="section-eyebrow mb-3">Seleção da semana</p>
             <h2 id="home-featured-title" className="section-title mb-4 text-4xl md:text-5xl">
               {featuredTitle}
             </h2>
@@ -371,9 +371,9 @@ export default function Home() {
                   </div>
                   <div className="p-5">
                     <h3 className="text-xl font-semibold text-gray-900">{collection.name}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{collection.count} peca(s) nessa colecao</p>
+                    <p className="mt-1 text-sm text-gray-500">{collection.count} peça(s) nesta coleção</p>
                     <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.14em] text-gray-600">
-                      Explorar colecao
+                      Explorar coleção
                       <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </div>
@@ -408,7 +408,7 @@ export default function Home() {
                 to="/sobre"
                 className="premium-focus premium-interactive mt-9 inline-flex items-center text-sm font-semibold text-white hover:text-[rgba(var(--theme-highlight-rgb),0.95)] focus-visible:ring-white"
               >
-                Conhecer a historia da marca
+                Conhecer a história da marca
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </div>

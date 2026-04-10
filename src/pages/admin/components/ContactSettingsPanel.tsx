@@ -1,5 +1,5 @@
 ﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock3, Facebook, Instagram, Loader2, Mail, MapPin, Phone, Save } from 'lucide-react';
+import { CheckCircle2, Clock3, Facebook, Instagram, Loader2, Mail, MapPin, Phone, Save, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { WhatsAppLogo } from '../../../components/icons/WhatsAppLogo';
 import { defaultSiteSettings } from '../../../data/defaultSiteSettings';
@@ -85,11 +85,11 @@ const sanitizeContact = (contact: SiteContactSettings): SiteContactSettings => (
 
 const getContactValidationError = (contact: SiteContactSettings) => {
   if (contact.title.trim().length < 3) {
-    return 'Informe um titulo da pagina com pelo menos 3 caracteres.';
+    return 'Informe um título da página com pelo menos 3 caracteres.';
   }
 
   if (contact.subtitle.trim().length < 8) {
-    return 'Informe um subtitulo mais descritivo para a pagina.';
+    return 'Informe um subtítulo mais descritivo para a página.';
   }
 
   if (contact.primaryCtaLabel.trim().length < 3) {
@@ -97,23 +97,23 @@ const getContactValidationError = (contact: SiteContactSettings) => {
   }
 
   if (contact.whatsappDisplay.trim().length < 6) {
-    return 'Informe um numero de WhatsApp valido para exibicao.';
+    return 'Informe um número de WhatsApp válido para exibição.';
   }
 
   if (!isValidUrl(contact.whatsappUrl)) {
-    return 'Informe um link valido de WhatsApp.';
+    return 'Informe um link válido de WhatsApp.';
   }
 
   if (!isValidEmail(contact.email)) {
-    return 'Informe um e-mail valido.';
+    return 'Informe um e-mail válido.';
   }
 
   if (!isValidUrl(contact.instagramUrl)) {
-    return 'Informe uma URL valida para o Instagram.';
+    return 'Informe uma URL válida para o Instagram.';
   }
 
   if (!isValidUrl(contact.facebookUrl)) {
-    return 'Informe uma URL valida para o Facebook.';
+    return 'Informe uma URL válida para o Facebook.';
   }
 
   return null;
@@ -177,10 +177,10 @@ export const ContactSettingsPanel = () => {
     try {
       const payload = sanitizeContact(formData);
       saveModuleSettings('contact', payload);
-      setStatus({ type: 'success', message: 'Configuracoes de contato salvas com sucesso.' });
+      setStatus({ type: 'success', message: 'Configurações de contato salvas com sucesso.' });
     } catch (error) {
-      console.error('Falha ao salvar configuracoes de contato', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar as configuracoes de contato.' });
+      console.error('Falha ao salvar configurações de contato', error);
+      setStatus({ type: 'error', message: 'Não foi possível salvar as configurações de contato.' });
     } finally {
       setIsSaving(false);
     }
@@ -188,7 +188,7 @@ export const ContactSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.contact);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   return (
@@ -196,8 +196,8 @@ export const ContactSettingsPanel = () => {
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Contato</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Pagina de contato</h2>
-          <p className="mt-1 text-sm text-gray-600">Edite dados, canais e mensagens da pagina /contato sem alterar codigo.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Página de contato</h2>
+          <p className="mt-1 text-sm text-gray-600">Edite dados, canais e mensagens da página /contato sem alterar código.</p>
         </div>
 
         {status && (
@@ -206,7 +206,7 @@ export const ContactSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -214,10 +214,10 @@ export const ContactSettingsPanel = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Conteudo principal</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Conteúdo principal</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Titulo da pagina</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Título da página</label>
               <input
                 type="text"
                 value={formData.title}
@@ -227,7 +227,7 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtítulo</label>
               <input
                 type="text"
                 value={formData.subtitle}
@@ -247,7 +247,7 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Titulo do CTA principal</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Título do CTA principal</label>
               <input
                 type="text"
                 value={formData.ctaTitle}
@@ -257,7 +257,7 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Texto do botao principal</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Texto do botão principal</label>
               <input
                 type="text"
                 value={formData.primaryCtaLabel}
@@ -267,7 +267,7 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descricao do CTA principal</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Descrição do CTA principal</label>
               <textarea
                 rows={3}
                 value={formData.ctaDescription}
@@ -282,7 +282,7 @@ export const ContactSettingsPanel = () => {
           <h3 className="text-sm font-semibold text-gray-900">Canais de contato</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">WhatsApp (exibicao)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">WhatsApp (exibição)</label>
               <input
                 type="text"
                 value={formData.whatsappDisplay}
@@ -301,10 +301,13 @@ export const ContactSettingsPanel = () => {
                 className={getFieldClassName()}
                 placeholder="https://wa.me/5511999999999"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Aceita `wa.me`, `api.whatsapp.com/send?phone=...` ou apenas o número com DDD/país.
+              </p>
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Telefone secundario</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Telefone secundário</label>
               <input
                 type="text"
                 value={formData.secondaryPhone}
@@ -371,11 +374,11 @@ export const ContactSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Endereco e horario</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Endereço e horário</h3>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereco (linha 1)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereço (linha 1)</label>
               <input
                 type="text"
                 value={formData.addressLine1}
@@ -385,7 +388,7 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereco (linha 2)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereço (linha 2)</label>
               <input
                 type="text"
                 value={formData.addressLine2}
@@ -395,13 +398,13 @@ export const ContactSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Horario de atendimento</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Horário de atendimento</label>
               <input
                 type="text"
                 value={formData.businessHours}
                 onChange={(event) => setField('businessHours', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Segunda a sexta, das 9h as 18h"
+                placeholder="Segunda a sexta, das 9h às 18h"
               />
             </div>
           </div>
@@ -414,7 +417,7 @@ export const ContactSettingsPanel = () => {
                 onChange={(event) => setField('showAddress', event.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-300"
               />
-              Exibir endereco na pagina
+              Exibir endereço na página
             </label>
 
             <label className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
@@ -424,14 +427,14 @@ export const ContactSettingsPanel = () => {
                 onChange={(event) => setField('showSocialLinks', event.target.checked)}
                 className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-300"
               />
-              Exibir redes sociais na pagina
+              Exibir redes sociais na página
             </label>
           </div>
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Preview basico</h3>
-          <p className="mt-1 text-xs text-gray-500">Resumo rapido de como os dados de contato serao exibidos para o cliente final.</p>
+          <h3 className="text-sm font-semibold text-gray-900">Preview básico</h3>
+          <p className="mt-1 text-xs text-gray-500">Resumo rápido de como os dados de contato serão exibidos para o cliente final.</p>
 
           <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
             <p className="text-xs uppercase tracking-[0.12em] text-gray-500">{preview.title}</p>
@@ -490,7 +493,7 @@ export const ContactSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">Os links e dados da pagina /contato vao refletir os valores salvos.</p>
+          <p className="text-xs text-gray-500">Os links e dados da página /contato vão refletir os valores salvos.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving}>

@@ -1,5 +1,5 @@
 ﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, CheckCircle2, Save } from 'lucide-react';
+import { ArrowDown, ArrowUp, CheckCircle2, Save, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { useProducts } from '../../../context/ProductContext';
@@ -52,13 +52,13 @@ const sectionMeta: Array<{
   {
     key: 'featured',
     label: 'Produtos em destaque',
-    description: 'Grade principal com produtos prioritarios da vitrine.',
+    description: 'Grade principal com produtos prioritários da vitrine.',
     visibilityField: 'showFeaturedProducts'
   },
   {
     key: 'collections',
-    label: 'Colecoes / novidades',
-    description: 'Campanhas, drops e colecoes em evidencia.',
+    label: 'Coleções / novidades',
+    description: 'Campanhas, drops e coleções em evidência.',
     visibilityField: 'showCollections'
   },
   {
@@ -69,14 +69,14 @@ const sectionMeta: Array<{
   },
   {
     key: 'benefits',
-    label: 'Beneficios',
+    label: 'Benefícios',
     description: 'Diferenciais comerciais da marca.',
     visibilityField: 'showBenefits'
   },
   {
     key: 'finalCta',
     label: 'CTA final',
-    description: 'Chamada final para contato e conversao.',
+    description: 'Chamada final para contato e conversão.',
     visibilityField: 'showFinalCta'
   }
 ];
@@ -213,7 +213,7 @@ export const HomeBlocksSettingsPanel = () => {
       }
 
       if (previousState.featuredProductIds.length >= 4) {
-        setStatus({ type: 'error', message: 'Selecione no maximo 4 produtos para destaque manual.' });
+        setStatus({ type: 'error', message: 'Selecione no máximo 4 produtos para destaque manual.' });
         return previousState;
       }
 
@@ -226,11 +226,11 @@ export const HomeBlocksSettingsPanel = () => {
 
   const validateForm = () => {
     if (!isValidFinalCtaHref(formData.finalCtaHref)) {
-      return 'Link do CTA final invalido.';
+      return 'Link do CTA final inválido.';
     }
 
     if (formData.benefitsItems.length === 0) {
-      return 'Informe ao menos 1 beneficio para o bloco de beneficios.';
+      return 'Informe ao menos 1 benefício para o bloco de benefícios.';
     }
 
     return null;
@@ -253,7 +253,7 @@ export const HomeBlocksSettingsPanel = () => {
       setStatus({ type: 'success', message: 'Blocos da Home salvos com sucesso.' });
     } catch (error) {
       console.error('Falha ao salvar Home Blocos', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar as configuracoes da Home.' });
+      setStatus({ type: 'error', message: 'Não foi possível salvar as configurações da Home.' });
     } finally {
       setIsSaving(false);
     }
@@ -261,7 +261,7 @@ export const HomeBlocksSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.home);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   const effectiveSectionOrder = normalizeSectionOrder(formData.sectionOrder);
@@ -281,7 +281,7 @@ export const HomeBlocksSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -347,12 +347,12 @@ export const HomeBlocksSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Titulos e textos dos blocos</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Títulos e textos dos blocos</h3>
           <p className="mt-1 text-xs text-gray-500">Personalize mensagem comercial e narrativa da Home.</p>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Categorias - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Categorias - título</label>
               <input
                 type="text"
                 value={formData.categoriesTitle}
@@ -362,7 +362,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Categorias - subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Categorias - subtítulo</label>
               <input
                 type="text"
                 value={formData.categoriesSubtitle}
@@ -372,7 +372,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Destaques - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Destaques - título</label>
               <input
                 type="text"
                 value={formData.featuredTitle}
@@ -382,7 +382,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Destaques - subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Destaques - subtítulo</label>
               <input
                 type="text"
                 value={formData.featuredSubtitle}
@@ -392,7 +392,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Colecoes - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Coleções - título</label>
               <input
                 type="text"
                 value={formData.collectionsTitle}
@@ -402,7 +402,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Colecoes - subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Coleções - subtítulo</label>
               <input
                 type="text"
                 value={formData.collectionsSubtitle}
@@ -422,7 +422,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Institucional - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Institucional - título</label>
               <input
                 type="text"
                 value={formData.institutionalTitle}
@@ -452,7 +452,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Beneficios - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Benefícios - título</label>
               <input
                 type="text"
                 value={formData.benefitsTitle}
@@ -462,7 +462,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Beneficios - subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Benefícios - subtítulo</label>
               <input
                 type="text"
                 value={formData.benefitsSubtitle}
@@ -472,13 +472,13 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Beneficios (1 por linha)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Benefícios (1 por linha)</label>
               <textarea
                 rows={4}
                 value={benefitsItemsText}
                 onChange={(event) => setField('benefitsItems', splitLines(event.target.value))}
                 className={getFieldClassName()}
-                placeholder={'Padrao premium\nEntrega eficiente\nSuporte consultivo'}
+                placeholder={'Padrão premium\nEntrega eficiente\nSuporte consultivo'}
               />
             </div>
 
@@ -493,7 +493,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - título</label>
               <input
                 type="text"
                 value={formData.finalCtaTitle}
@@ -503,7 +503,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - subtítulo</label>
               <textarea
                 rows={2}
                 value={formData.finalCtaSubtitle}
@@ -513,7 +513,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - texto do botao</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - texto do botão</label>
               <input
                 type="text"
                 value={formData.finalCtaLabel}
@@ -523,7 +523,7 @@ export const HomeBlocksSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - link do botao</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">CTA final - link do botão</label>
               <input
                 type="text"
                 value={formData.finalCtaHref}
@@ -538,7 +538,7 @@ export const HomeBlocksSettingsPanel = () => {
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <h3 className="text-sm font-semibold text-gray-900">Produtos em destaque</h3>
           <p className="mt-1 text-xs text-gray-500">
-            Selecione ate 4 produtos para destaque manual. Se vazio, o sistema usa destaque automatico.
+            Selecione até 4 produtos para destaque manual. Se vazio, o sistema usa destaque automático.
           </p>
 
           <div className="mt-3 rounded-xl border border-gray-200 bg-white p-3">
@@ -578,7 +578,7 @@ export const HomeBlocksSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">As alteracoes controlam visibilidade, ordem e copy dos blocos da Home.</p>
+          <p className="text-xs text-gray-500">As alterações controlam visibilidade, ordem e copy dos blocos da Home.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving}>

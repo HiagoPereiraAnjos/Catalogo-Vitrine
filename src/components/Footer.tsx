@@ -124,16 +124,16 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="premium-reveal premium-reveal-delay-1">
-            <h4 className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Navegacao</h4>
+            <h4 className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">Navegação</h4>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link to="/" className={footerLinkClassName}>
-                  Inicio
+                  Início
                 </Link>
               </li>
               <li>
                 <Link to="/produtos" className={footerLinkClassName}>
-                  Colecao
+                  Coleção
                 </Link>
               </li>
               <li>
@@ -203,10 +203,10 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex items-center gap-4">
             <a href="#" className={footerLinkClassName}>
-              Politica de Privacidade
+              Política de Privacidade
             </a>
             <a href="#" className={footerLinkClassName}>
-              Termos de Servico
+              Termos de Serviço
             </a>
           </div>
         </div>

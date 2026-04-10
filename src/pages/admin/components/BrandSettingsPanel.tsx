@@ -1,11 +1,12 @@
 ﻿import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload } from 'lucide-react';
+import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { useSiteSettings } from '../../../hooks/useSiteSettings';
 import { ImageStorageService } from '../../../services/imageStorageService';
 import { SiteBrandSettings } from '../../../types/siteSettings';
 import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_BYTES,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB,
   isAcceptedImageFileType
@@ -96,19 +97,19 @@ const getBrandValidationError = (brand: SiteBrandSettings) => {
   }
 
   if (!isValidEmail(brand.contactEmail)) {
-    return 'Informe um e-mail valido.';
+    return 'Informe um e-mail válido.';
   }
 
   if (!isValidUrl(brand.siteUrl)) {
-    return 'Informe uma URL valida para o site.';
+    return 'Informe uma URL válida para o site.';
   }
 
   if (!isValidUrl(brand.whatsappUrl)) {
-    return 'Informe uma URL valida para o WhatsApp.';
+    return 'Informe uma URL válida para o WhatsApp.';
   }
 
   if (!isValidUrl(brand.instagramUrl)) {
-    return 'Informe uma URL valida para o Instagram.';
+    return 'Informe uma URL válida para o Instagram.';
   }
 
   return null;
@@ -118,12 +119,12 @@ const imageFieldMeta: Array<{ field: BrandImageField; title: string; description
   {
     field: 'logoImage',
     title: 'Logo da marca',
-    description: 'Usada no header e nas areas institucionais.'
+    description: 'Usada no header e nas áreas institucionais.'
   },
   {
     field: 'faviconImage',
     title: 'Favicon (opcional)',
-    description: 'Icone exibido na aba do navegador quando personalizado.'
+    description: 'Ícone exibido na aba do navegador quando personalizado.'
   },
   {
     field: 'institutionalImage',
@@ -168,7 +169,7 @@ export const BrandSettingsPanel = () => {
     if (!isAcceptedImageFileType(file)) {
       setStatus({
         type: 'error',
-        message: `Arquivo "${file.name}" invalido. Use JPG, PNG ou WEBP.`
+        message: `Arquivo "${file.name}" inválido. Use JPG, PNG ou WEBP.`
       });
       return;
     }
@@ -189,7 +190,7 @@ export const BrandSettingsPanel = () => {
       setStatus({ type: 'success', message: `Imagem "${file.name}" pronta para salvar.` });
     } catch (error) {
       console.error('Falha ao enviar imagem da marca', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel processar esta imagem.' });
+      setStatus({ type: 'error', message: 'Não foi possível processar esta imagem. Tente JPG, PNG ou WEBP.' });
     } finally {
       setUploadState((previousState) => ({ ...previousState, [field]: false }));
     }
@@ -211,8 +212,8 @@ export const BrandSettingsPanel = () => {
       saveModuleSettings('brand', payload);
       setStatus({ type: 'success', message: 'Identidade da marca salva com sucesso.' });
     } catch (error) {
-      console.error('Falha ao salvar configuracoes de marca', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar a identidade da marca.' });
+      console.error('Falha ao salvar configurações de marca', error);
+      setStatus({ type: 'error', message: 'Não foi possível salvar a identidade da marca.' });
     } finally {
       setIsSaving(false);
     }
@@ -220,16 +221,16 @@ export const BrandSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.brand);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   return (
     <section className="premium-reveal rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_22px_44px_-34px_rgba(17,24,39,0.55)] md:p-7">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Configuracoes globais</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Configurações globais</p>
           <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Marca</h2>
-          <p className="mt-1 text-sm text-gray-600">Edite identidade, canais e midia institucional sem alterar codigo.</p>
+          <p className="mt-1 text-sm text-gray-600">Edite identidade, canais e mídia institucional sem alterar código.</p>
         </div>
         {status && (
           <span
@@ -237,7 +238,7 @@ export const BrandSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -246,7 +247,7 @@ export const BrandSettingsPanel = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <h3 className="text-sm font-semibold text-gray-900">Identidade textual</h3>
-          <p className="mt-1 text-xs text-gray-500">Nome, slogan e assinatura curta usados em areas institucionais.</p>
+          <p className="mt-1 text-xs text-gray-500">Nome, slogan e assinatura curta usados em áreas institucionais.</p>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -300,7 +301,7 @@ export const BrandSettingsPanel = () => {
                 value={formData.heroEyebrow}
                 onChange={(event) => setField('heroEyebrow', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Nova colecao de jeans premium"
+                placeholder="Nova coleção de jeans premium"
               />
             </div>
           </div>
@@ -308,7 +309,7 @@ export const BrandSettingsPanel = () => {
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <h3 className="text-sm font-semibold text-gray-900">Canais e contato</h3>
-          <p className="mt-1 text-xs text-gray-500">Informacoes exibidas no rodape, pagina de contato e links de atendimento.</p>
+          <p className="mt-1 text-xs text-gray-500">Informações exibidas no rodapé, página de contato e links de atendimento.</p>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
@@ -331,6 +332,9 @@ export const BrandSettingsPanel = () => {
                 className={getFieldClassName()}
                 placeholder="https://wa.me/5511999999999"
               />
+              <p className="mt-1 text-xs text-gray-500">
+                Aceita `wa.me`, `api.whatsapp.com/send?phone=...` ou apenas o número com DDD/país.
+              </p>
             </div>
 
             <div>
@@ -378,7 +382,7 @@ export const BrandSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereco resumido (linha 1)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereço resumido (linha 1)</label>
               <input
                 type="text"
                 value={formData.addressLine1}
@@ -389,13 +393,13 @@ export const BrandSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereco resumido (linha 2)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Endereço resumido (linha 2)</label>
               <input
                 type="text"
                 value={formData.addressLine2}
                 onChange={(event) => setField('addressLine2', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Sao Paulo, SP"
+                placeholder="São Paulo, SP"
               />
             </div>
           </div>
@@ -440,7 +444,7 @@ export const BrandSettingsPanel = () => {
                     value={value}
                     onChange={(event) => setField(item.field, event.target.value)}
                     className={`${getFieldClassName()} mt-3 text-xs`}
-                    placeholder="URL externa ou referencia local"
+                    placeholder="URL externa ou referência local"
                   />
 
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -449,7 +453,7 @@ export const BrandSettingsPanel = () => {
                       Upload
                       <input
                         type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                         className="sr-only"
                         disabled={isUploading || isSaving}
                         onChange={(event) => {
@@ -473,7 +477,7 @@ export const BrandSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">Header, Footer e textos institucionais vao refletir os dados salvos.</p>
+          <p className="text-xs text-gray-500">Header, Footer e textos institucionais vão refletir os dados salvos.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving || hasPendingUpload}>

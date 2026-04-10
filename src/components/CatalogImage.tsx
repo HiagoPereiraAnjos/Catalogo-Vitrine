@@ -59,6 +59,7 @@ export const CatalogImage = ({
   );
   const [isLoaded, setIsLoaded] = useState(false);
   const [isResolvingLocalRef, setIsResolvingLocalRef] = useState(false);
+  const isFallbackSource = resolvedSource === fallbackSource || resolvedSource === hardFallbackSource;
 
   useEffect(() => {
     let isMounted = true;
@@ -115,6 +116,9 @@ export const CatalogImage = ({
     } else if (resolvedSource !== hardFallbackSource) {
       setIsLoaded(false);
       setResolvedSource(hardFallbackSource);
+    } else {
+      // Avoid permanent transparent state if even the hard fallback fails for any reason.
+      setIsLoaded(true);
     }
 
     onError?.(event);
@@ -134,7 +138,7 @@ export const CatalogImage = ({
       decoding={decoding}
       referrerPolicy={referrerPolicy}
       className={`${className || ''} transition-opacity duration-500 ${
-        isLoaded && !isResolvingLocalRef ? 'opacity-100' : 'opacity-0'
+        isResolvingLocalRef || (!isLoaded && !isFallbackSource) ? 'opacity-0' : 'opacity-100'
       }`}
       onLoad={handleLoad}
       onError={handleError}

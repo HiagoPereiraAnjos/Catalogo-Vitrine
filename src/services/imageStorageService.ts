@@ -31,6 +31,9 @@ let databasePromise: Promise<IDBDatabase> | null = null;
 const objectUrlCache = new Map<string, string>();
 
 const isBrowserEnvironment = () => typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+const resetDatabaseConnection = () => {
+  databasePromise = null;
+};
 
 const createImageId = () => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -42,7 +45,7 @@ const createImageId = () => {
 
 const openDatabase = () => {
   if (!isBrowserEnvironment()) {
-    return Promise.reject(new Error('IndexedDB indisponivel no ambiente atual.'));
+    return Promise.reject(new Error('IndexedDB indisponível no ambiente atual.'));
   }
 
   if (databasePromise) {
@@ -59,8 +62,25 @@ const openDatabase = () => {
       }
     };
 
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error('Falha ao abrir IndexedDB.'));
+    request.onsuccess = () => {
+      const database = request.result;
+      database.onclose = resetDatabaseConnection;
+      database.onversionchange = () => {
+        database.close();
+        resetDatabaseConnection();
+      };
+      resolve(database);
+    };
+
+    request.onerror = () => {
+      resetDatabaseConnection();
+      reject(request.error || new Error('Falha ao abrir IndexedDB.'));
+    };
+
+    request.onblocked = () => {
+      resetDatabaseConnection();
+      reject(new Error('Abertura do IndexedDB bloqueada por outra aba/processo.'));
+    };
   });
 
   return databasePromise;
@@ -70,12 +90,20 @@ const runWriteTransaction = async (operation: (store: IDBObjectStore) => void) =
   const database = await openDatabase();
 
   await new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction(IMAGE_STORE_NAME, 'readwrite');
+    let transaction: IDBTransaction;
+    try {
+      transaction = database.transaction(IMAGE_STORE_NAME, 'readwrite');
+    } catch (error) {
+      resetDatabaseConnection();
+      reject(error);
+      return;
+    }
+
     const store = transaction.objectStore(IMAGE_STORE_NAME);
 
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error || new Error('Erro ao gravar no IndexedDB.'));
-    transaction.onabort = () => reject(transaction.error || new Error('Transacao abortada no IndexedDB.'));
+    transaction.onabort = () => reject(transaction.error || new Error('Transação abortada no IndexedDB.'));
 
     operation(store);
   });
@@ -85,7 +113,15 @@ const runReadRequest = async <T>(requestFactory: (store: IDBObjectStore) => IDBR
   const database = await openDatabase();
 
   return new Promise<T>((resolve, reject) => {
-    const transaction = database.transaction(IMAGE_STORE_NAME, 'readonly');
+    let transaction: IDBTransaction;
+    try {
+      transaction = database.transaction(IMAGE_STORE_NAME, 'readonly');
+    } catch (error) {
+      resetDatabaseConnection();
+      reject(error);
+      return;
+    }
+
     const store = transaction.objectStore(IMAGE_STORE_NAME);
     const request = requestFactory(store);
 
@@ -98,7 +134,15 @@ const runReadAll = async () => {
   const database = await openDatabase();
 
   return new Promise<StoredImageRecord[]>((resolve, reject) => {
-    const transaction = database.transaction(IMAGE_STORE_NAME, 'readonly');
+    let transaction: IDBTransaction;
+    try {
+      transaction = database.transaction(IMAGE_STORE_NAME, 'readonly');
+    } catch (error) {
+      resetDatabaseConnection();
+      reject(error);
+      return;
+    }
+
     const store = transaction.objectStore(IMAGE_STORE_NAME);
     const request = store.getAll() as IDBRequest<StoredImageRecord[]>;
 
@@ -225,7 +269,7 @@ export const ImageStorageService = {
   async saveExternalImage(url: string) {
     const normalizedUrl = url.trim();
     if (!normalizedUrl) {
-      throw new Error('URL de imagem invalida para salvar.');
+      throw new Error('URL de imagem inválida para salvar.');
     }
 
     const existing = await findUrlRecord(normalizedUrl);
@@ -249,13 +293,23 @@ export const ImageStorageService = {
   },
 
   async getImage(id: string) {
-    const record = await getRecordById(id);
-    return record ? toMeta(record) : null;
+    try {
+      const record = await getRecordById(id);
+      return record ? toMeta(record) : null;
+    } catch (error) {
+      console.error('Falha ao consultar imagem no IndexedDB', error);
+      return null;
+    }
   },
 
   async getAllImages() {
-    const records = await runReadAll();
-    return records.map(toMeta).sort((left, right) => right.createdAt - left.createdAt);
+    try {
+      const records = await runReadAll();
+      return records.map(toMeta).sort((left, right) => right.createdAt - left.createdAt);
+    } catch (error) {
+      console.error('Falha ao listar imagens no IndexedDB', error);
+      return [];
+    }
   },
 
   async deleteImage(id: string) {
@@ -276,7 +330,12 @@ export const ImageStorageService = {
   },
 
   async resolveImageIdToObjectUrl(imageId: string) {
-    return resolveImageIdToSource(imageId.trim());
+    try {
+      return await resolveImageIdToSource(imageId.trim());
+    } catch (error) {
+      console.error('Falha ao resolver referência de imagem local', error);
+      return null;
+    }
   },
 
   async resolveRefToObjectUrl(ref: string) {
@@ -285,7 +344,12 @@ export const ImageStorageService = {
       return ref;
     }
 
-    return resolveImageIdToSource(imageId);
+    try {
+      return await resolveImageIdToSource(imageId);
+    } catch (error) {
+      console.error('Falha ao resolver ref local para preview', error);
+      return null;
+    }
   },
 
   revokeObjectUrlById(id: string) {
@@ -334,4 +398,3 @@ export const ImageStorageService = {
     await this.deleteImage(id);
   }
 };
-

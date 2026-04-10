@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -28,8 +28,9 @@ import { SeoSettingsPanel } from './SeoSettingsPanel';
 
 type NoticeType = 'success' | 'error';
 
-type SectionKey = 'brand' | 'home' | 'about' | 'contact' | 'seo' | 'appearance';
+export type SiteCustomizationSectionKey = 'brand' | 'home' | 'about' | 'contact' | 'seo' | 'appearance';
 type HomePanelKey = 'hero' | 'blocks';
+type SectionGroupKey = 'brandIdentity' | 'siteContent' | 'visibility';
 
 type ResetTarget =
   | {
@@ -44,73 +45,118 @@ interface StatusMessage {
   message: string;
 }
 
+interface SectionGroup {
+  key: SectionGroupKey;
+  label: string;
+  description: string;
+}
+
 interface CustomizationSection {
-  key: SectionKey;
+  key: SiteCustomizationSectionKey;
   label: string;
   description: string;
   helperText: string;
+  impactDescription: string;
+  impactAreas: string[];
   moduleKey: SiteSettingsModuleKey;
   icon: LucideIcon;
+  group: SectionGroupKey;
 }
+
+const SECTION_GROUPS: SectionGroup[] = [
+  {
+    key: 'brandIdentity',
+    label: 'Marca e identidade',
+    description: 'Quem é a marca e como ela é percebida.'
+  },
+  {
+    key: 'siteContent',
+    label: 'Conteúdo e relacionamento',
+    description: 'Mensagem comercial e páginas institucionais.'
+  },
+  {
+    key: 'visibility',
+    label: 'Descoberta e presença',
+    description: 'Busca, compartilhamento e consistência visual.'
+  }
+];
 
 const CUSTOMIZATION_SECTIONS: CustomizationSection[] = [
   {
     key: 'brand',
     label: 'Marca',
     description: 'Logo, assinatura e canais oficiais.',
-    helperText: 'Atualize nome da marca, slogan, contatos e imagens institucionais.',
+    helperText: 'Defina nome da marca, slogan, contatos e imagens institucionais.',
+    impactDescription: 'Esses dados aparecem nas áreas fixas do site e reforçam credibilidade.',
+    impactAreas: ['Cabeçalho e rodapé', 'Resumo institucional da Home', 'Informações de contato em páginas públicas'],
     moduleKey: 'brand',
-    icon: Store
+    icon: Store,
+    group: 'brandIdentity'
+  },
+  {
+    key: 'appearance',
+    label: 'Aparência',
+    description: 'Cores, botões e estilo visual.',
+    helperText: 'Ajuste a identidade visual do site com combinações seguras e legíveis.',
+    impactDescription: 'A aparência muda o tom visual geral sem alterar estrutura do layout.',
+    impactAreas: ['Botões e badges', 'Destaques de seções', 'Fundo e contraste de componentes'],
+    moduleKey: 'appearance',
+    icon: Palette,
+    group: 'brandIdentity'
   },
   {
     key: 'home',
     label: 'Home',
     description: 'Hero, blocos e narrativa comercial.',
-    helperText: 'Edite hero, textos da vitrine, visibilidade e ordem dos blocos da Home.',
+    helperText: 'Edite banner principal, textos da vitrine e ordem dos blocos da Home.',
+    impactDescription: 'Essa seção afeta a primeira impressão e os principais caminhos de conversão.',
+    impactAreas: ['Banner principal (desktop e mobile)', 'Blocos de categorias, destaques e benefícios', 'CTA final e links de contato'],
     moduleKey: 'home',
-    icon: Home
+    icon: Home,
+    group: 'siteContent'
   },
   {
     key: 'about',
     label: 'Sobre',
-    description: 'Historia, missao e diferenciais.',
-    helperText: 'Controle todo o conteudo institucional da pagina Sobre.',
+    description: 'História, missão e diferenciais.',
+    helperText: 'Organize textos e imagens institucionais da página Sobre.',
+    impactDescription: 'Conteúdo institucional claro aumenta confiança e valor percebido.',
+    impactAreas: ['Hero da página Sobre', 'Bloco de história e posicionamento', 'Galeria institucional'],
     moduleKey: 'about',
-    icon: Info
+    icon: Info,
+    group: 'siteContent'
   },
   {
     key: 'contact',
     label: 'Contato',
-    description: 'Canais, endereco e CTA principal.',
-    helperText: 'Configure WhatsApp, e-mail, redes sociais e textos da pagina de contato.',
+    description: 'Canais, endereço e CTA principal.',
+    helperText: 'Configure WhatsApp, e-mail, redes sociais e chamada de atendimento.',
+    impactDescription: 'Facilita o contato do cliente e reduz fricção no atendimento.',
+    impactAreas: ['Página /contato', 'Botões de chamada para atendimento', 'Dados exibidos em canais institucionais'],
     moduleKey: 'contact',
-    icon: PhoneCall
+    icon: PhoneCall,
+    group: 'siteContent'
   },
   {
     key: 'seo',
     label: 'SEO',
-    description: 'Titulos, descricoes e imagem social.',
-    helperText: 'Ajuste os metadados principais para busca e compartilhamento.',
+    description: 'Títulos, descrições e imagem social.',
+    helperText: 'Defina como o site aparece no Google e no compartilhamento de links.',
+    impactDescription: 'Ajustes de SEO melhoram descoberta e apresentação da marca fora do site.',
+    impactAreas: ['Título e descrição das páginas principais', 'Imagem de compartilhamento (Open Graph)', 'Palavras-chave de contexto'],
     moduleKey: 'seo',
-    icon: Search
-  },
-  {
-    key: 'appearance',
-    label: 'Aparencia',
-    description: 'Cores, botoes e preset visual.',
-    helperText: 'Personalize o tema com opcoes seguras para manter o visual premium.',
-    moduleKey: 'appearance',
-    icon: Palette
+    icon: Search,
+    group: 'visibility'
   }
 ];
 
-const getSectionByKey = (sectionKey: SectionKey) =>
+const getSectionByKey = (sectionKey: SiteCustomizationSectionKey) =>
   CUSTOMIZATION_SECTIONS.find((section) => section.key === sectionKey) || CUSTOMIZATION_SECTIONS[0];
 
 const formatUpdatedAt = (updatedAt: string) => {
   const timestamp = Date.parse(updatedAt);
   if (!Number.isFinite(timestamp)) {
-    return 'Ainda nao salvo';
+    return 'Ainda não salvo';
   }
 
   return new Intl.DateTimeFormat('pt-BR', {
@@ -119,13 +165,21 @@ const formatUpdatedAt = (updatedAt: string) => {
   }).format(new Date(timestamp));
 };
 
-export const SiteCustomizationPanel = () => {
+interface SiteCustomizationPanelProps {
+  initialSection?: SiteCustomizationSectionKey;
+}
+
+export const SiteCustomizationPanel = ({ initialSection = 'brand' }: SiteCustomizationPanelProps) => {
   const { settings, error, resetModuleSettings, resetSettings } = useSiteSettings();
-  const [activeSection, setActiveSection] = useState<SectionKey>('brand');
+  const [activeSection, setActiveSection] = useState<SiteCustomizationSectionKey>(initialSection);
   const [activeHomePanel, setActiveHomePanel] = useState<HomePanelKey>('hero');
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [pendingReset, setPendingReset] = useState<ResetTarget | null>(null);
   const [isResetting, setIsResetting] = useState(false);
+
+  useEffect(() => {
+    setActiveSection(initialSection);
+  }, [initialSection]);
 
   useEffect(() => {
     if (!status) {
@@ -145,6 +199,15 @@ export const SiteCustomizationPanel = () => {
   const activeSectionMeta = useMemo(() => getSectionByKey(activeSection), [activeSection]);
   const updatedAtLabel = useMemo(() => formatUpdatedAt(settings.updatedAt), [settings.updatedAt]);
 
+  const groupedSections = useMemo(
+    () =>
+      SECTION_GROUPS.map((group) => ({
+        ...group,
+        sections: CUSTOMIZATION_SECTIONS.filter((section) => section.group === group.key)
+      })),
+    []
+  );
+
   const handleConfirmReset = () => {
     if (!pendingReset) {
       return;
@@ -155,22 +218,22 @@ export const SiteCustomizationPanel = () => {
     try {
       if (pendingReset.mode === 'all') {
         resetSettings();
-        setStatus({ type: 'success', message: 'Todas as personalizacoes foram restauradas para o padrao.' });
+        setStatus({ type: 'success', message: 'Todos os módulos foram restaurados para o padrão.' });
       } else {
         resetModuleSettings(pendingReset.moduleKey);
         setStatus({
           type: 'success',
-          message: `A secao "${pendingReset.sectionLabel}" foi restaurada para o padrao.`
+          message: `A seção "${pendingReset.sectionLabel}" voltou para o padrão.`
         });
       }
     } catch (caughtError) {
-      console.error('Falha ao resetar personalizacao', caughtError);
+      console.error('Falha ao resetar personalização', caughtError);
       setStatus({
         type: 'error',
         message:
           pendingReset.mode === 'all'
-            ? 'Nao foi possivel resetar todas as personalizacoes.'
-            : `Nao foi possivel resetar a secao "${pendingReset.sectionLabel}".`
+            ? 'Não foi possível restaurar todos os módulos.'
+            : `Não foi possível restaurar a seção "${pendingReset.sectionLabel}".`
       });
     } finally {
       setIsResetting(false);
@@ -183,7 +246,7 @@ export const SiteCustomizationPanel = () => {
       return (
         <div className="space-y-4">
           <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-3 md:hidden">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Secoes da Home</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Partes da Home</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -245,22 +308,35 @@ export const SiteCustomizationPanel = () => {
     if (activeSection === 'brand') {
       return (
         <div className="space-y-3">
-          <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3">
-            <div className="h-14 w-14 overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
-              <CatalogImage
-                src={settings.brand.logoImage}
-                alt={settings.brand.name}
-                className="h-full w-full object-cover"
-                fallback={{ style: 'editorial', label: 'Logo' }}
-              />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-gray-200 bg-white p-2.5">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Logo</p>
+              <div className="aspect-square overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={settings.brand.logoImage}
+                  alt={settings.brand.name}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'editorial', label: 'Logo' }}
+                />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-gray-900">{settings.brand.name}</p>
-              <p className="line-clamp-2 text-xs text-gray-500">{settings.brand.tagline}</p>
+            <div className="rounded-xl border border-gray-200 bg-white p-2.5">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Institucional</p>
+              <div className="aspect-square overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={settings.brand.institutionalImage}
+                  alt={`${settings.brand.name} institucional`}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'institutional', label: 'Marca' }}
+                />
+              </div>
             </div>
           </div>
+
           <div className="rounded-xl border border-gray-200 bg-white p-3 text-xs text-gray-600">
-            <p className="font-medium text-gray-800">Contato atual</p>
+            <p className="text-sm font-semibold text-gray-900">{settings.brand.name}</p>
+            <p className="mt-1 line-clamp-2">{settings.brand.tagline || defaultSiteSettings.brand.tagline}</p>
+            <p className="mt-2 font-medium text-gray-800">Contato público</p>
             <p className="mt-1">{settings.brand.whatsappDisplay || defaultSiteSettings.brand.whatsappDisplay}</p>
             <p>{settings.brand.contactEmail || defaultSiteSettings.brand.contactEmail}</p>
           </div>
@@ -269,21 +345,43 @@ export const SiteCustomizationPanel = () => {
     }
 
     if (activeSection === 'home') {
+      const previewMobileImage = settings.home.heroMobileImage || settings.home.heroDesktopImage;
+
       return (
         <div className="space-y-3">
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <div className="aspect-[16/10]">
-              <CatalogImage
-                src={settings.home.heroDesktopImage}
-                alt={settings.home.heroTitle}
-                className="h-full w-full object-cover"
-                fallback={{ style: 'editorial', label: 'Hero' }}
-              />
+          <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-2">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-2">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Hero desktop</p>
+              <div className="aspect-[16/10] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={settings.home.heroDesktopImage}
+                  alt={settings.home.heroTitle}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'editorial', label: 'Hero desktop' }}
+                />
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-2">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Mobile</p>
+              <div className="aspect-[9/16] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={previewMobileImage}
+                  alt={`${settings.home.heroTitle} mobile`}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'editorial', label: 'Hero mobile' }}
+                />
+              </div>
             </div>
           </div>
+
           <div className="rounded-xl border border-gray-200 bg-white p-3">
-            <p className="line-clamp-2 text-sm font-semibold text-gray-900">{settings.home.heroTitle}</p>
-            <p className="mt-1 line-clamp-2 text-xs text-gray-500">{settings.home.heroSubtitle}</p>
+            <p className="line-clamp-2 text-sm font-semibold text-gray-900">
+              {settings.home.heroTitle || defaultSiteSettings.home.heroTitle}
+            </p>
+            <p className="mt-1 line-clamp-2 text-xs text-gray-500">
+              {settings.home.heroSubtitle || defaultSiteSettings.home.heroSubtitle}
+            </p>
           </div>
         </div>
       );
@@ -291,7 +389,7 @@ export const SiteCustomizationPanel = () => {
 
     if (activeSection === 'appearance') {
       const previewColors = [
-        { label: 'Primaria', value: settings.appearance.primaryColor },
+        { label: 'Primária', value: settings.appearance.primaryColor },
         { label: 'Destaque', value: settings.appearance.highlightColor },
         { label: 'Apoio', value: settings.appearance.supportColor },
         { label: 'Fundo', value: settings.appearance.backgroundColor }
@@ -311,6 +409,11 @@ export const SiteCustomizationPanel = () => {
               <span className="text-[11px] font-mono text-gray-500">{item.value}</span>
             </div>
           ))}
+
+          <div className="rounded-xl border border-gray-200 bg-white p-3">
+            <p className="text-[11px] uppercase tracking-[0.12em] text-gray-500">Aplicação</p>
+            <p className="mt-1 text-xs text-gray-600">Botões, badges e destaques seguem essa paleta no site público.</p>
+          </div>
         </div>
       );
     }
@@ -318,16 +421,32 @@ export const SiteCustomizationPanel = () => {
     if (activeSection === 'about') {
       return (
         <div className="space-y-3">
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <div className="aspect-[4/3]">
-              <CatalogImage
-                src={settings.about.heroImage}
-                alt={settings.about.title}
-                className="h-full w-full object-cover"
-                fallback={{ style: 'editorial', label: 'Sobre' }}
-              />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-2">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Hero</p>
+              <div className="aspect-[4/3] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={settings.about.heroImage}
+                  alt={settings.about.title}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'editorial', label: 'Sobre hero' }}
+                />
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-2">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">Institucional</p>
+              <div className="aspect-[4/3] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+                <CatalogImage
+                  src={settings.about.mainImage}
+                  alt={settings.about.storyTitle}
+                  className="h-full w-full object-cover"
+                  fallback={{ style: 'institutional', label: 'Sobre principal' }}
+                />
+              </div>
             </div>
           </div>
+
           <div className="rounded-xl border border-gray-200 bg-white p-3">
             <p className="text-sm font-semibold text-gray-900">{settings.about.title}</p>
             <p className="mt-1 line-clamp-2 text-xs text-gray-500">{settings.about.subtitle}</p>
@@ -340,7 +459,9 @@ export const SiteCustomizationPanel = () => {
       return (
         <div className="rounded-xl border border-gray-200 bg-white p-3 text-xs text-gray-600">
           <p className="text-sm font-semibold text-gray-900">{settings.contact.title}</p>
-          <p className="mt-2">{settings.contact.whatsappDisplay}</p>
+          <p className="mt-1 line-clamp-2 text-gray-500">{settings.contact.subtitle}</p>
+          <p className="mt-2 font-medium text-gray-800">Canais ativos</p>
+          <p className="mt-1">{settings.contact.whatsappDisplay}</p>
           <p>{settings.contact.email}</p>
           {settings.contact.showAddress && (
             <p className="mt-2">
@@ -353,11 +474,28 @@ export const SiteCustomizationPanel = () => {
       );
     }
 
+    const seoImage = settings.seo.defaultOgImage || defaultSiteSettings.seo.defaultOgImage;
+
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Previa meta</p>
-        <p className="mt-2 text-sm font-semibold text-gray-900">{settings.seo.institutionalTitle}</p>
-        <p className="mt-1 text-xs text-gray-500">{settings.seo.defaultDescription}</p>
+      <div className="space-y-3">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white p-2">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+            Imagem de compartilhamento
+          </p>
+          <div className="aspect-[1.91/1] overflow-hidden rounded-lg border border-gray-100 bg-gray-50">
+            <CatalogImage
+              src={seoImage}
+              alt="Imagem social de SEO"
+              className="h-full w-full object-cover"
+              fallback={{ style: 'institutional', label: 'Open Graph' }}
+            />
+          </div>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-3">
+          <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Prévia meta</p>
+          <p className="mt-2 text-sm font-semibold text-gray-900">{settings.seo.institutionalTitle}</p>
+          <p className="mt-1 line-clamp-2 text-xs text-gray-500">{settings.seo.defaultDescription}</p>
+        </div>
       </div>
     );
   };
@@ -370,10 +508,12 @@ export const SiteCustomizationPanel = () => {
       <section className="premium-reveal rounded-3xl border border-gray-200 bg-white p-5 shadow-[0_26px_58px_-44px_rgba(17,24,39,0.58)] md:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Configuracao do site</p>
-            <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Personalizacao visual</h2>
-            <p className="mt-1 text-sm text-gray-600">Edite os modulos como um mini CMS, com preview e fallbacks seguros.</p>
-            <p className="mt-2 text-xs text-gray-500">Ultima atualizacao salva: {updatedAtLabel}</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Editor do site</p>
+            <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Personalização visual</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Faça ajustes por área, revise a prévia e salve dentro de cada módulo.
+            </p>
+            <p className="mt-2 text-xs text-gray-500">Última atualização salva: {updatedAtLabel}</p>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -389,11 +529,11 @@ export const SiteCustomizationPanel = () => {
               }
             >
               <RotateCcw className="h-4 w-4" />
-              Resetar secao atual
+              Restaurar seção
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setPendingReset({ mode: 'all' })}>
               <AlertTriangle className="h-4 w-4" />
-              Resetar tudo
+              Restaurar tudo
             </Button>
           </div>
         </div>
@@ -411,92 +551,124 @@ export const SiteCustomizationPanel = () => {
           </div>
         )}
 
-        <div className="mt-6 space-y-5 xl:grid xl:grid-cols-[264px_minmax(0,1fr)] xl:gap-5 xl:space-y-0">
-          <div className="space-y-3 xl:hidden">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Modulos</p>
-              <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-                {CUSTOMIZATION_SECTIONS.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = section.key === activeSection;
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-800">Fluxo recomendado</p>
+          <p className="mt-1 text-sm text-blue-900">
+            1) Edite os campos da seção atual, 2) confira a prévia rápida ao lado, 3) clique em salvar no módulo para publicar.
+          </p>
+        </div>
 
-                  return (
-                    <button
-                      key={`mobile-${section.key}`}
-                      type="button"
-                      onClick={() => setActiveSection(section.key)}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={`premium-focus premium-interactive inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        isActive
-                          ? 'border-gray-900 bg-gray-900 text-white'
-                          : 'border-gray-200 bg-white text-gray-700'
-                      }`}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span className="whitespace-nowrap">{section.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+        <div className="mt-6 space-y-5 xl:grid xl:grid-cols-[280px_minmax(0,1fr)] xl:gap-5 xl:space-y-0">
+          <div className="space-y-3 xl:hidden">
+            <div className="space-y-2 rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Módulos</p>
+              {groupedSections.map((group) => (
+                <div key={`mobile-${group.key}`}>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">{group.label}</p>
+                  <div className="mt-1 flex gap-2 overflow-x-auto pb-1">
+                    {group.sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = section.key === activeSection;
+
+                      return (
+                        <button
+                          key={`mobile-${section.key}`}
+                          type="button"
+                          onClick={() => setActiveSection(section.key)}
+                          aria-current={isActive ? 'page' : undefined}
+                          className={`premium-focus premium-interactive inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                            isActive
+                              ? 'border-gray-900 bg-gray-900 text-white'
+                              : 'border-gray-200 bg-white text-gray-700'
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          <span className="whitespace-nowrap">{section.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <details className="rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-                Preview rapido
+                Preview rápido
               </summary>
               <div className="mt-3">{renderPreview()}</div>
             </details>
           </div>
 
           <aside className="hidden space-y-4 xl:block">
-            <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Modulos</p>
-              <nav className="mt-3 space-y-1.5">
-                {CUSTOMIZATION_SECTIONS.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = section.key === activeSection;
-                  return (
-                    <button
-                      key={section.key}
-                      type="button"
-                      onClick={() => setActiveSection(section.key)}
-                      aria-current={isActive ? 'page' : undefined}
-                      className={`premium-focus premium-interactive w-full rounded-xl border px-3 py-2 text-left transition ${
-                        isActive
-                          ? 'border-gray-900 bg-gray-900 text-white shadow-[0_14px_26px_-20px_rgba(17,24,39,0.9)]'
-                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-100'
-                      }`}
-                    >
-                      <span className="flex items-start gap-2.5">
-                        <Icon className={`mt-0.5 h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
-                        <span>
-                          <span className={`block text-sm font-semibold ${isActive ? 'text-white' : 'text-gray-900'}`}>
-                            {section.label}
+            <div className="space-y-3 rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Módulos</p>
+
+              {groupedSections.map((group) => (
+                <div key={group.key} className="space-y-1.5">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">{group.label}</p>
+                    <p className="text-[11px] text-gray-500">{group.description}</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {group.sections.map((section) => {
+                      const Icon = section.icon;
+                      const isActive = section.key === activeSection;
+                      return (
+                        <button
+                          key={section.key}
+                          type="button"
+                          onClick={() => setActiveSection(section.key)}
+                          aria-current={isActive ? 'page' : undefined}
+                          className={`premium-focus premium-interactive w-full rounded-xl border px-3 py-2 text-left transition ${
+                            isActive
+                              ? 'border-gray-900 bg-gray-900 text-white shadow-[0_14px_26px_-20px_rgba(17,24,39,0.9)]'
+                              : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-100'
+                          }`}
+                        >
+                          <span className="flex items-start gap-2.5">
+                            <Icon className={`mt-0.5 h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                            <span>
+                              <span className={`block text-sm font-semibold ${isActive ? 'text-white' : 'text-gray-900'}`}>
+                                {section.label}
+                              </span>
+                              <span className={`mt-0.5 block text-xs ${isActive ? 'text-gray-200' : 'text-gray-500'}`}>
+                                {section.description}
+                              </span>
+                            </span>
                           </span>
-                          <span className={`mt-0.5 block text-xs ${isActive ? 'text-gray-200' : 'text-gray-500'}`}>
-                            {section.description}
-                          </span>
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Preview rapido</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Preview rápido</p>
               <div className="mt-3">{renderPreview()}</div>
             </div>
           </aside>
 
           <div className="space-y-4">
             <div className="rounded-2xl border border-gray-200 bg-gray-50/80 px-4 py-3">
-              <h3 className="text-sm font-semibold text-gray-900">{activeSectionMeta.label}</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Você está editando: {activeSectionMeta.label}</h3>
               <p className="mt-1 text-xs text-gray-600">{activeSectionMeta.helperText}</p>
               <p className="mt-2 text-xs text-gray-500">
-                Dica: faca os ajustes, use o botao de salvar dentro do modulo e acompanhe os previews ao lado.
+                As mudanças só ficam visíveis no site público depois do botão de salvar dentro do módulo.
               </p>
+            </div>
+
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">Impacto no site público</p>
+              <p className="mt-1 text-sm text-amber-900">{activeSectionMeta.impactDescription}</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-900">
+                {activeSectionMeta.impactAreas.map((item) => (
+                  <li key={item} className="leading-relaxed">{item}</li>
+                ))}
+              </ul>
             </div>
 
             {renderActiveSection()}
@@ -511,11 +683,11 @@ export const SiteCustomizationPanel = () => {
             setPendingReset(null);
           }
         }}
-        title={pendingReset?.mode === 'all' ? 'Resetar todas as personalizacoes' : 'Resetar secao atual'}
+        title={pendingReset?.mode === 'all' ? 'Restaurar todo o site para o padrão' : 'Restaurar seção para o padrão'}
         description={
           pendingReset?.mode === 'all'
-            ? 'Essa acao restaura todo o conteudo do site para os valores padrao.'
-            : `Essa acao restaura os dados da secao ${pendingReset?.sectionLabel || ''}.`
+            ? 'Essa ação remove as personalizações salvas de todos os módulos.'
+            : `Essa ação remove as personalizações da seção ${pendingReset?.sectionLabel || ''}.`
         }
         maxWidthClassName="sm:max-w-lg"
       >
@@ -524,8 +696,8 @@ export const SiteCustomizationPanel = () => {
             <p className="text-sm font-medium text-red-700">Confirme para continuar.</p>
             <p className="mt-1 text-xs text-red-700/90">
               {pendingReset?.mode === 'all'
-                ? 'Voce perdera as personalizacoes salvas de todos os modulos.'
-                : 'Voce perdera as personalizacoes salvas desta secao.'}
+                ? 'Você perderá todas as personalizações atuais e o site voltará ao padrão.'
+                : 'Você perderá as personalizações atuais desta seção.'}
             </p>
           </div>
 
@@ -535,7 +707,7 @@ export const SiteCustomizationPanel = () => {
             </Button>
             <Button variant="danger" onClick={handleConfirmReset} disabled={isResetting}>
               {isResetting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Confirmar reset
+              {isResetting ? 'Restaurando...' : 'Restaurar agora'}
             </Button>
           </div>
         </div>

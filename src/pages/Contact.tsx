@@ -128,7 +128,7 @@ export default function Contact() {
     }
 
     if (!isValidEmail(form.email.trim())) {
-      nextErrors.email = 'Informe um e-mail valido.';
+      nextErrors.email = 'Informe um e-mail válido.';
     }
 
     if (!form.message.trim() || form.message.trim().length < 12) {
@@ -191,7 +191,7 @@ export default function Contact() {
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_1.1fr]">
             <div className="space-y-6">
               <div className="surface-card premium-reveal-delay-1 rounded-3xl border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-6">
-                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-green-700">Canal prioritario</p>
+                <p className="mb-2 text-xs uppercase tracking-[0.2em] text-green-700">Canal prioritário</p>
                 <h2 className="mb-3 text-2xl font-semibold text-green-900">{ctaTitle}</h2>
                 <p className="mb-3 text-sm text-green-800">{ctaDescription}</p>
                 <p className="mb-5 text-sm text-green-800">{supportText}</p>
@@ -239,7 +239,7 @@ export default function Contact() {
                   <div className="flex items-start gap-3">
                     <Phone className="mt-0.5 h-5 w-5 text-gray-600" />
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">Telefone secundario</p>
+                      <p className="text-sm font-semibold text-gray-900">Telefone secundário</p>
                       <p className="text-sm text-gray-600">{secondaryPhone}</p>
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export default function Contact() {
                   <div className="flex items-start gap-3">
                     <MapPin className="mt-0.5 h-5 w-5 text-gray-600" />
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">Endereco</p>
+                      <p className="text-sm font-semibold text-gray-900">Endereço</p>
                       <p className="text-sm text-gray-600">
                         {addressLine1} - {addressLine2}
                       </p>
@@ -298,7 +298,7 @@ export default function Contact() {
                 <div className="flex items-start gap-3">
                   <Clock3 className="mt-0.5 h-5 w-5 text-gray-600" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Horario de atendimento</p>
+                    <p className="text-sm font-semibold text-gray-900">Horário de atendimento</p>
                     <p className="text-sm text-gray-600">{businessHours}</p>
                   </div>
                 </div>
@@ -306,10 +306,10 @@ export default function Contact() {
             </div>
 
             <div className="surface-card-strong premium-reveal-delay-3 p-6 md:p-7">
-              <p className="section-eyebrow mb-3">Formulario</p>
+              <p className="section-eyebrow mb-3">Formulário</p>
               <h2 className="section-title text-3xl">Envie sua mensagem</h2>
               <p className="mt-2 text-sm text-gray-600">
-                Este formulario nao envia dados reais, mas simula a experiencia institucional da marca.
+                Este formulário não envia dados reais, mas simula a experiência institucional da marca.
               </p>
 
               <AnimatePresence initial={false}>
@@ -364,7 +364,7 @@ export default function Contact() {
                       value={form.email}
                       onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
                       className={getFieldClassName(Boolean(errors.email))}
-                      placeholder="voce@empresa.com"
+                      placeholder="você@empresa.com"
                     />
                     {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
                   </div>
@@ -395,7 +395,7 @@ export default function Contact() {
                       value={form.subject}
                       onChange={(event) => setForm((prev) => ({ ...prev, subject: event.target.value }))}
                       className={getFieldClassName(Boolean(errors.subject))}
-                      placeholder="Ex: Duvida sobre tamanho"
+                      placeholder="Ex: Dúvida sobre tamanho"
                     />
                   </div>
                 </div>

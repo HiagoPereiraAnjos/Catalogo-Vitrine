@@ -1,5 +1,5 @@
 ﻿import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Loader2, Save, Trash2, Upload } from 'lucide-react';
+import { CheckCircle2, Loader2, Save, Trash2, Upload, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { defaultSiteSettings } from '../../../data/defaultSiteSettings';
@@ -7,6 +7,7 @@ import { useSiteSettings } from '../../../hooks/useSiteSettings';
 import { ImageStorageService } from '../../../services/imageStorageService';
 import { SiteAboutSettings } from '../../../types/siteSettings';
 import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_BYTES,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB,
   isAcceptedImageFileType
@@ -68,13 +69,13 @@ const sanitizeAbout = (about: SiteAboutSettings): SiteAboutSettings => ({
 const imageFieldMeta: Array<{ field: AboutImageField; title: string; description: string }> = [
   {
     field: 'heroImage',
-    title: 'Imagem principal da pagina',
-    description: 'Banner de abertura da pagina Sobre.'
+    title: 'Imagem principal da página',
+    description: 'Banner de abertura da página Sobre.'
   },
   {
     field: 'mainImage',
     title: 'Imagem institucional principal',
-    description: 'Imagem do bloco de historia/posicionamento.'
+    description: 'Imagem do bloco de história/posicionamento.'
   }
 ];
 
@@ -113,7 +114,7 @@ export const AboutSettingsPanel = () => {
 
   const validateImageFile = (file: File) => {
     if (!isAcceptedImageFileType(file)) {
-      return `Arquivo "${file.name}" invalido. Use JPG, PNG ou WEBP.`;
+      return `Arquivo "${file.name}" inválido. Use JPG, PNG ou WEBP.`;
     }
 
     if (file.size > MAX_PRODUCT_IMAGE_UPLOAD_SIZE_BYTES) {
@@ -144,8 +145,8 @@ export const AboutSettingsPanel = () => {
       setField(field, localRef);
       setStatus({ type: 'success', message: `Imagem "${file.name}" pronta para salvar.` });
     } catch (error) {
-      console.error('Falha ao enviar imagem da pagina Sobre', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel processar esta imagem.' });
+      console.error('Falha ao enviar imagem da página Sobre', error);
+      setStatus({ type: 'error', message: 'Não foi possível processar esta imagem. Tente JPG, PNG ou WEBP.' });
     } finally {
       setUploadState((previousState) => ({ ...previousState, [field]: false }));
     }
@@ -185,10 +186,10 @@ export const AboutSettingsPanel = () => {
     try {
       const uploadedRefs = await ImageStorageService.saveFiles(filesToUpload);
       setField('galleryImages', [...formData.galleryImages, ...uploadedRefs].slice(0, MAX_ABOUT_GALLERY_IMAGES));
-      setStatus({ type: 'success', message: `${uploadedRefs.length} imagem(ns) adicionada(s) a galeria.` });
+      setStatus({ type: 'success', message: `${uploadedRefs.length} imagem(ns) adicionada(s) à galeria.` });
     } catch (error) {
-      console.error('Falha ao enviar galeria da pagina Sobre', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel processar a galeria enviada.' });
+      console.error('Falha ao enviar galeria da página Sobre', error);
+      setStatus({ type: 'error', message: 'Não foi possível processar a galeria enviada. Revise formato e tamanho dos arquivos.' });
     } finally {
       setUploadState((previousState) => ({ ...previousState, galleryImages: false }));
     }
@@ -205,12 +206,12 @@ export const AboutSettingsPanel = () => {
     event.preventDefault();
 
     if (formData.title.trim().length < 3) {
-      setStatus({ type: 'error', message: 'Informe um titulo da pagina com pelo menos 3 caracteres.' });
+      setStatus({ type: 'error', message: 'Informe um título da página com pelo menos 3 caracteres.' });
       return;
     }
 
     if (formData.storyText.trim().length < 20) {
-      setStatus({ type: 'error', message: 'A historia da marca deve ter pelo menos 20 caracteres.' });
+      setStatus({ type: 'error', message: 'A história da marca deve ter pelo menos 20 caracteres.' });
       return;
     }
 
@@ -219,10 +220,10 @@ export const AboutSettingsPanel = () => {
     try {
       const payload = sanitizeAbout(formData);
       saveModuleSettings('about', payload);
-      setStatus({ type: 'success', message: 'Pagina Sobre atualizada com sucesso.' });
+      setStatus({ type: 'success', message: 'Página Sobre atualizada com sucesso.' });
     } catch (error) {
-      console.error('Falha ao salvar configuracoes da pagina Sobre', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar as configuracoes da pagina Sobre.' });
+      console.error('Falha ao salvar configurações da página Sobre', error);
+      setStatus({ type: 'error', message: 'Não foi possível salvar as configurações da página Sobre.' });
     } finally {
       setIsSaving(false);
     }
@@ -230,7 +231,7 @@ export const AboutSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.about);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   const previewGalleryImages =
@@ -241,8 +242,8 @@ export const AboutSettingsPanel = () => {
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Sobre</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Conteudo institucional</h2>
-          <p className="mt-1 text-sm text-gray-600">Edite textos e imagens da pagina Sobre sem alterar codigo.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Conteúdo institucional</h2>
+          <p className="mt-1 text-sm text-gray-600">Edite textos e imagens da página Sobre sem alterar código.</p>
         </div>
 
         {status && (
@@ -251,7 +252,7 @@ export const AboutSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -259,10 +260,10 @@ export const AboutSettingsPanel = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Cabecalho da pagina</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Cabeçalho da página</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Titulo da pagina</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Título da página</label>
               <input
                 type="text"
                 value={formData.title}
@@ -272,7 +273,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtítulo</label>
               <input
                 type="text"
                 value={formData.subtitle}
@@ -287,7 +288,7 @@ export const AboutSettingsPanel = () => {
           <h3 className="text-sm font-semibold text-gray-900">Textos institucionais</h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Historia da marca - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">História da marca - título</label>
               <input
                 type="text"
                 value={formData.storyTitle}
@@ -307,7 +308,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Historia da marca (texto)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">História da marca (texto)</label>
               <textarea
                 rows={4}
                 value={formData.storyText}
@@ -318,7 +319,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Missao - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Missão - título</label>
               <input
                 type="text"
                 value={formData.missionTitle}
@@ -328,7 +329,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Missao</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Missão</label>
               <textarea
                 rows={3}
                 value={formData.missionText}
@@ -338,7 +339,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Valores - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Valores - título</label>
               <input
                 type="text"
                 value={formData.valuesTitle}
@@ -358,7 +359,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Posicionamento - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Posicionamento - título</label>
               <input
                 type="text"
                 value={formData.positioningTitle}
@@ -388,7 +389,7 @@ export const AboutSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Diferenciais - titulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Diferenciais - título</label>
               <input
                 type="text"
                 value={formData.differentialsTitle}
@@ -410,7 +411,7 @@ export const AboutSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Imagens da pagina Sobre</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Imagens da página Sobre</h3>
           <p className="mt-1 text-xs text-gray-500">
             Upload local com IndexedDB e preview imediato. Formatos: JPG, PNG, WEBP (max. {MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB}MB).
           </p>
@@ -439,7 +440,7 @@ export const AboutSettingsPanel = () => {
                     value={value}
                     onChange={(event) => setField(item.field, event.target.value)}
                     className={`${getFieldClassName()} mt-3 text-xs`}
-                    placeholder="URL externa ou referencia local"
+                    placeholder="URL externa ou referência local"
                   />
 
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -448,7 +449,7 @@ export const AboutSettingsPanel = () => {
                       Upload
                       <input
                         type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                         className="sr-only"
                         disabled={isUploading || isSaving}
                         onChange={(event) => {
@@ -479,10 +480,10 @@ export const AboutSettingsPanel = () => {
 
               <label className="premium-interactive inline-flex cursor-pointer items-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
                 {uploadState.galleryImages ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-                Upload multiplo
+                Upload múltiplo
                 <input
                   type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                   multiple
                   className="sr-only"
                   disabled={uploadState.galleryImages || isSaving}
@@ -521,7 +522,7 @@ export const AboutSettingsPanel = () => {
                           Remover
                         </button>
                       ) : (
-                        <p className="text-[11px] text-gray-500">Fallback padrao</p>
+                        <p className="text-[11px] text-gray-500">Fallback padrão</p>
                       )}
                     </article>
                   );
@@ -532,7 +533,7 @@ export const AboutSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">A pagina Sobre reflete os textos e imagens salvos imediatamente.</p>
+          <p className="text-xs text-gray-500">A página Sobre reflete os textos e imagens salvos imediatamente.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving || hasPendingUpload}>

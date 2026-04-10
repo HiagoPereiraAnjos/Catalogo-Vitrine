@@ -1,5 +1,5 @@
 ﻿import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload } from 'lucide-react';
+import { CheckCircle2, Image as ImageIcon, Loader2, Save, Upload, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { defaultSiteSettings } from '../../../data/defaultSiteSettings';
@@ -8,6 +8,7 @@ import { useSiteSettings } from '../../../hooks/useSiteSettings';
 import { ImageStorageService } from '../../../services/imageStorageService';
 import { SiteHomeSettings } from '../../../types/siteSettings';
 import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_BYTES,
   MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB,
   isAcceptedImageFileType
@@ -80,7 +81,7 @@ const heroImageFieldMeta: Array<{ field: HeroImageField; title: string; descript
   {
     field: 'heroMobileImage',
     title: 'Imagem mobile',
-    description: 'Versao otimizada para telas menores.'
+    description: 'Versão otimizada para telas menores.'
   }
 ];
 
@@ -129,7 +130,7 @@ export const HomeHeroSettingsPanel = () => {
     if (!isAcceptedImageFileType(file)) {
       setStatus({
         type: 'error',
-        message: `Arquivo "${file.name}" invalido. Use JPG, PNG ou WEBP.`
+        message: `Arquivo "${file.name}" inválido. Use JPG, PNG ou WEBP.`
       });
       return;
     }
@@ -150,7 +151,7 @@ export const HomeHeroSettingsPanel = () => {
       setStatus({ type: 'success', message: `Imagem "${file.name}" pronta para salvar.` });
     } catch (error) {
       console.error('Falha ao enviar imagem da hero', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel processar esta imagem.' });
+      setStatus({ type: 'error', message: 'Não foi possível processar esta imagem. Tente JPG, PNG ou WEBP.' });
     } finally {
       setUploadState((previousState) => ({ ...previousState, [field]: false }));
     }
@@ -162,15 +163,15 @@ export const HomeHeroSettingsPanel = () => {
     }
 
     if (formData.heroSubtitle.trim().length > 0 && formData.heroSubtitle.trim().length < 12) {
-      return 'O subtitulo deve ter pelo menos 12 caracteres.';
+      return 'O subtítulo deve ter pelo menos 12 caracteres.';
     }
 
     if (!isValidCtaHref(formData.primaryCtaHref)) {
-      return 'Link do botao principal invalido.';
+      return 'Link do botão principal inválido.';
     }
 
     if (!isValidCtaHref(formData.secondaryCtaHref)) {
-      return 'Link do botao secundario invalido.';
+      return 'Link do botão secundário inválido.';
     }
 
     return null;
@@ -190,10 +191,10 @@ export const HomeHeroSettingsPanel = () => {
     try {
       const payload = sanitizeHomeSettings(formData);
       saveModuleSettings('home', payload);
-      setStatus({ type: 'success', message: 'Hero da Home salva com sucesso.' });
+      setStatus({ type: 'success', message: 'Hero da Home salvo com sucesso.' });
     } catch (error) {
       console.error('Falha ao salvar Home Hero', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar esta configuracao.' });
+      setStatus({ type: 'error', message: 'Não foi possível salvar esta configuração.' });
     } finally {
       setIsSaving(false);
     }
@@ -201,7 +202,7 @@ export const HomeHeroSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.home);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   return (
@@ -210,7 +211,7 @@ export const HomeHeroSettingsPanel = () => {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Home</p>
           <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Hero</h2>
-          <p className="mt-1 text-sm text-gray-600">Edite headline, subtitulo, CTAs e imagens da principal vitrine da Home.</p>
+          <p className="mt-1 text-sm text-gray-600">Edite headline, subtítulo, CTAs e imagens da principal vitrine da Home.</p>
         </div>
 
         {status && (
@@ -219,7 +220,7 @@ export const HomeHeroSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -228,7 +229,7 @@ export const HomeHeroSettingsPanel = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <h3 className="text-sm font-semibold text-gray-900">Texto e chamadas</h3>
-          <p className="mt-1 text-xs text-gray-500">Conteudo principal da dobra inicial da Home.</p>
+          <p className="mt-1 text-xs text-gray-500">Conteúdo principal da dobra inicial da Home.</p>
 
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
@@ -238,7 +239,7 @@ export const HomeHeroSettingsPanel = () => {
                 value={formData.heroEyebrow}
                 onChange={(event) => setField('heroEyebrow', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Nova colecao de jeans premium"
+                placeholder="Nova coleção de jeans premium"
               />
             </div>
 
@@ -249,7 +250,7 @@ export const HomeHeroSettingsPanel = () => {
                 value={formData.heroTag}
                 onChange={(event) => setField('heroTag', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Nova colecao"
+                placeholder="Nova coleção"
               />
             </div>
 
@@ -262,34 +263,34 @@ export const HomeHeroSettingsPanel = () => {
                 value={formData.heroTitle}
                 onChange={(event) => setField('heroTitle', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Jeans premium para marcar presenca"
+                placeholder="Jeans premium para marcar presença"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtitulo</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Subtítulo</label>
               <textarea
                 rows={2}
                 value={formData.heroSubtitle}
                 onChange={(event) => setField('heroSubtitle', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Pecas com modelagem precisa e acabamento premium para looks comerciais."
+                placeholder="Peças com modelagem precisa e acabamento premium para looks comerciais."
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botao principal (texto)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botão principal (texto)</label>
               <input
                 type="text"
                 value={formData.primaryCtaLabel}
                 onChange={(event) => setField('primaryCtaLabel', event.target.value)}
                 className={getFieldClassName()}
-                placeholder="Ver colecao completa"
+                placeholder="Ver coleção completa"
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botao principal (link)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botão principal (link)</label>
               <input
                 type="text"
                 value={formData.primaryCtaHref}
@@ -300,7 +301,7 @@ export const HomeHeroSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botao secundario (texto)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botão secundário (texto)</label>
               <input
                 type="text"
                 value={formData.secondaryCtaLabel}
@@ -311,7 +312,7 @@ export const HomeHeroSettingsPanel = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botao secundario (link)</label>
+              <label className="mb-1.5 block text-sm font-medium text-gray-700">Botão secundário (link)</label>
               <input
                 type="text"
                 value={formData.secondaryCtaHref}
@@ -362,7 +363,7 @@ export const HomeHeroSettingsPanel = () => {
                     value={value}
                     onChange={(event) => setField(item.field, event.target.value)}
                     className={`${getFieldClassName()} mt-3 text-xs`}
-                    placeholder="URL externa ou referencia local"
+                    placeholder="URL externa ou referência local"
                   />
 
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -371,7 +372,7 @@ export const HomeHeroSettingsPanel = () => {
                       Upload
                       <input
                         type="file"
-                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        accept={IMAGE_UPLOAD_ACCEPT_ATTR}
                         className="sr-only"
                         disabled={isUploading || isSaving}
                         onChange={(event) => {
@@ -396,7 +397,7 @@ export const HomeHeroSettingsPanel = () => {
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
           <h3 className="text-sm font-semibold text-gray-900">Preview da hero</h3>
-          <p className="mt-1 text-xs text-gray-500">Visualizacao rapida para desktop e mobile antes de salvar.</p>
+          <p className="mt-1 text-xs text-gray-500">Visualização rápida para desktop e mobile antes de salvar.</p>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_260px]">
             <article className="relative overflow-hidden rounded-2xl border border-gray-200 bg-black text-white">
@@ -452,7 +453,7 @@ export const HomeHeroSettingsPanel = () => {
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">A Home publica atualizacoes de texto, links e imagens logo apos salvar.</p>
+          <p className="text-xs text-gray-500">A Home publica atualizações de texto, links e imagens logo após salvar.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving || hasPendingUpload}>

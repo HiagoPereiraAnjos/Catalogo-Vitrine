@@ -1,5 +1,5 @@
 ﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Palette, Save } from 'lucide-react';
+import { CheckCircle2, Palette, Save, XCircle } from 'lucide-react';
 import { Button } from '../../../components/Button';
 import { defaultSiteSettings } from '../../../data/defaultSiteSettings';
 import { useSiteSettings } from '../../../hooks/useSiteSettings';
@@ -133,8 +133,8 @@ export const AppearanceSettingsPanel = () => {
       saveModuleSettings('appearance', payload);
       setStatus({ type: 'success', message: 'Tema visual salvo com sucesso.' });
     } catch (error) {
-      console.error('Falha ao salvar configuracoes de aparencia', error);
-      setStatus({ type: 'error', message: 'Nao foi possivel salvar o tema visual.' });
+      console.error('Falha ao salvar configurações de aparência', error);
+      setStatus({ type: 'error', message: 'Não foi possível salvar o tema visual.' });
     } finally {
       setIsSaving(false);
     }
@@ -142,16 +142,16 @@ export const AppearanceSettingsPanel = () => {
 
   const handleReset = () => {
     setFormData(settings.appearance);
-    setStatus({ type: 'success', message: 'Alteracoes locais descartadas.' });
+    setStatus({ type: 'success', message: 'Alterações locais descartadas.' });
   };
 
   return (
     <section className="premium-reveal rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_22px_44px_-34px_rgba(17,24,39,0.55)] md:p-7">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Aparencia</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Aparência</p>
           <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Tema visual controlado</h2>
-          <p className="mt-1 text-sm text-gray-600">Personalize cores e estilo dos botoes com opcoes seguras, sem quebrar o layout premium.</p>
+          <p className="mt-1 text-sm text-gray-600">Personalize cores e estilo dos botões com opções seguras, sem quebrar o layout premium.</p>
         </div>
 
         {status && (
@@ -160,7 +160,7 @@ export const AppearanceSettingsPanel = () => {
               status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
             }`}
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
+            {status.type === 'success' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
             {status.message}
           </span>
         )}
@@ -250,7 +250,7 @@ export const AppearanceSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Estilo de botoes</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Estilo de botões</h3>
           <div className="mt-3 grid gap-2 md:grid-cols-3">
             {APPEARANCE_BUTTON_STYLES.map((option) => {
               const isSelected = formData.buttonStyle === option.value;
@@ -308,16 +308,16 @@ export const AppearanceSettingsPanel = () => {
         </section>
 
         <section className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4">
-          <h3 className="text-sm font-semibold text-gray-900">Preview rapido</h3>
+          <h3 className="text-sm font-semibold text-gray-900">Preview rápido</h3>
 
           <div className="mt-4 rounded-2xl border p-4" style={{ borderColor: preview.borderColor, backgroundColor: preview.surfaceColor }}>
             <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: preview.supportColor }}>
-              Aparencia da marca
+              Aparência da marca
             </p>
             <h4 className="mt-2 text-2xl" style={{ color: preview.primaryColor, fontFamily: 'var(--font-serif)' }}>
               Denim Premium
             </h4>
-            <p className="mt-2 text-sm text-gray-600">Seu tema se aplica em Header, botoes, badges e principais CTAs.</p>
+            <p className="mt-2 text-sm text-gray-600">Seu tema se aplica em Header, botões, badges e principais CTAs.</p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <span
@@ -332,17 +332,17 @@ export const AppearanceSettingsPanel = () => {
                 Badge de destaque
               </span>
               <Button type="button" variant="primary" size="sm">
-                Botao principal
+                Botão principal
               </Button>
               <Button type="button" variant="outline" size="sm">
-                Botao secundario
+                Botão secundário
               </Button>
             </div>
           </div>
         </section>
 
         <div className="flex flex-col-reverse gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-gray-500">Personalizacao controlada: o layout permanece consistente e premium.</p>
+          <p className="text-xs text-gray-500">Personalização controlada: o layout permanece consistente e premium.</p>
 
           <div className="flex gap-3 sm:justify-end">
             <Button type="button" variant="outline" onClick={handleReset} disabled={!isDirty || isSaving}>
@@ -350,7 +350,7 @@ export const AppearanceSettingsPanel = () => {
             </Button>
             <Button type="submit" disabled={!isDirty || isSaving}>
               <Save className="h-4 w-4" />
-              {isSaving ? 'Salvando...' : 'Salvar aparencia'}
+              {isSaving ? 'Salvando...' : 'Salvar aparência'}
             </Button>
           </div>
         </div>

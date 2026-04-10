@@ -6,7 +6,7 @@ const getSettingsSnapshot = () => {
   try {
     return SiteSettingsService.getSettings();
   } catch (error) {
-    console.error('Falha ao carregar configuracoes do site. Usando padrao.', error);
+    console.error('Falha ao carregar configurações do site. Usando padrão.', error);
     return defaultSiteSettings;
   }
 };

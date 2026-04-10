@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   ChevronLeft,
@@ -16,7 +16,11 @@ import { CatalogImage } from '../../../components/CatalogImage';
 import { Modal } from '../../../components/Modal';
 import { ImageStorageService } from '../../../services/imageStorageService';
 import { ProductCreateInput } from '../../../types';
-import { MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB, validateImageUploadFiles } from '../../../utils/imageSources';
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB,
+  validateImageUploadFiles
+} from '../../../utils/imageSources';
 import {
   buildCollectionImageDraft,
   buildDefaultDescription,
@@ -52,12 +56,12 @@ interface CollectionWizardProps {
 }
 
 const WIZARD_STEPS = [
-  'Dados da colecao',
+  'Dados da coleção',
   'Upload de imagens',
-  'Agrupamento automatico',
-  'Edicao em lote',
-  'Revisao',
-  'Confirmacao'
+  'Agrupamento automático',
+  'Edição em lote',
+  'Revisão',
+  'Confirmação'
 ] as const;
 
 const DEFAULT_SIZES = '38, 40, 42, 44';
@@ -94,12 +98,13 @@ export const CollectionWizard = ({
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageDraftsRef = useRef<CollectionWizardImageDraft[]>([]);
 
-  const isBusy = isSubmitting || isPersistingImages;
+  const isBusy = isSubmitting || isPersistingImages || isProcessingUpload;
 
   const imageDraftById = useMemo(() => new Map(imageDrafts.map((item) => [item.id, item])), [imageDrafts]);
   const imageSignature = useMemo(() => imageDrafts.map((item) => item.fileKey).join('|'), [imageDrafts]);
   const groupedImages = useMemo(() => groupCollectionImageDrafts(imageDrafts), [imageDrafts]);
   const isGroupingOutdated = groupedImageSignature !== imageSignature;
+  const hasReachedUploadLimit = imageDrafts.length >= MAX_COLLECTION_WIZARD_IMAGES;
   const totalDroppedImages = useMemo(
     () => groupedImages.reduce((total, group) => total + group.droppedImageCount, 0),
     [groupedImages]
@@ -161,6 +166,11 @@ export const CollectionWizard = ({
       return;
     }
 
+    if (isBusy) {
+      setErrorMessage('Aguarde o processamento atual terminar para adicionar novas imagens.');
+      return;
+    }
+
     const validationError = validateImageUploadFiles(files);
     if (validationError) {
       setErrorMessage(validationError);
@@ -171,12 +181,12 @@ export const CollectionWizard = ({
     const uniqueFiles = files.filter((file) => !existingFileKeys.has(`${file.name}-${file.size}-${file.lastModified}`));
 
     if (uniqueFiles.length === 0) {
-      setErrorMessage('As imagens selecionadas ja foram adicionadas.');
+      setErrorMessage('As imagens selecionadas já foram adicionadas.');
       return;
     }
 
     if (imageDraftsRef.current.length + uniqueFiles.length > MAX_COLLECTION_WIZARD_IMAGES) {
-      setErrorMessage(`Use no maximo ${MAX_COLLECTION_WIZARD_IMAGES} imagens por colecao no wizard.`);
+      setErrorMessage(`Use no máximo ${MAX_COLLECTION_WIZARD_IMAGES} imagens por coleção no wizard.`);
       return;
     }
 
@@ -193,7 +203,7 @@ export const CollectionWizard = ({
       setImageDrafts((previous) => [...previous, ...nextDrafts]);
     } catch (error) {
       nextDrafts.forEach((draft) => revokeCollectionImageDraft(draft));
-      setErrorMessage('Nao foi possivel preparar as imagens selecionadas.');
+      setErrorMessage('Não foi possível preparar as imagens selecionadas.');
       console.error('Erro ao preparar imagens do wizard', error);
     } finally {
       setIsProcessingUpload(false);
@@ -215,6 +225,9 @@ export const CollectionWizard = ({
   const handleDropzoneDragOver: React.DragEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (isBusy || hasReachedUploadLimit) {
+      return;
+    }
     if (!isDropzoneActive) {
       setIsDropzoneActive(true);
     }
@@ -231,9 +244,23 @@ export const CollectionWizard = ({
     event.stopPropagation();
     setIsDropzoneActive(false);
 
-    const droppedFiles = Array.from(event.dataTransfer.files as FileList).filter((file): file is File =>
-      file.type.startsWith('image/')
-    );
+    if (isBusy) {
+      setErrorMessage('Aguarde o processamento atual terminar para adicionar novas imagens.');
+      return;
+    }
+
+    if (hasReachedUploadLimit) {
+      setErrorMessage(`Use no máximo ${MAX_COLLECTION_WIZARD_IMAGES} imagens por coleção no wizard.`);
+      return;
+    }
+
+    const fileList = event.dataTransfer.files;
+    const droppedFiles = fileList
+      ? Array.from({ length: fileList.length }, (_, index) => fileList.item(index)).filter(
+          (file): file is File => file !== null
+        )
+      : [];
+
     await appendFiles(droppedFiles);
   };
 
@@ -311,7 +338,7 @@ export const CollectionWizard = ({
 
   const applyBatchValues = () => {
     if (productDrafts.length === 0) {
-      setErrorMessage('Gere os produtos automaticamente antes de aplicar edicao em lote.');
+      setErrorMessage('Gere os produtos automaticamente antes de aplicar edição em lote.');
       return;
     }
 
@@ -385,27 +412,27 @@ export const CollectionWizard = ({
       const sizes = parseCommaList(product.sizesInput);
 
       if (product.name.trim().length < 3) {
-        errors.push('Nome com minimo de 3 caracteres.');
+        errors.push('Nome com mínimo de 3 caracteres.');
       }
 
       if (product.sku.trim().length < 4) {
-        errors.push('SKU com minimo de 4 caracteres.');
+        errors.push('SKU com mínimo de 4 caracteres.');
       } else if (existingSkuKeys.has(normalizedSku)) {
-        errors.push('SKU ja existe no catalogo.');
+        errors.push('SKU já existe no catálogo.');
       } else if ((draftSkuCount.get(normalizedSku) || 0) > 1) {
         errors.push('SKU duplicado dentro do wizard.');
       }
 
       if (!Number.isFinite(parsedPrice) || (parsedPrice ?? 0) <= 0) {
-        errors.push('Preco invalido. Informe um valor maior que zero.');
+        errors.push('Preço inválido. Informe um valor maior que zero.');
       }
 
       if (!product.category || product.category.toLocaleLowerCase('pt-BR') === 'todos') {
-        errors.push('Selecione uma categoria valida.');
+        errors.push('Selecione uma categoria válida.');
       }
 
       if (!product.gender || product.gender.toLocaleLowerCase('pt-BR') === 'todos') {
-        errors.push('Selecione um genero valido.');
+        errors.push('Selecione um gênero válido.');
       }
 
       if (sizes.length === 0) {
@@ -413,7 +440,7 @@ export const CollectionWizard = ({
       }
 
       if (!product.collection.trim()) {
-        errors.push('Colecao obrigatoria.');
+        errors.push('Coleção obrigatória.');
       }
 
       if (product.imageIds.length === 0) {
@@ -434,12 +461,12 @@ export const CollectionWizard = ({
   const goToNextStep = () => {
     if (stepIndex === 0) {
       if (collectionName.trim().length < 2) {
-        setErrorMessage('Informe o nome da colecao com ao menos 2 caracteres.');
+        setErrorMessage('Informe o nome da coleção com ao menos 2 caracteres.');
         return;
       }
 
       if (!defaultCategory || !defaultGender) {
-        setErrorMessage('Selecione categoria e genero padrao para continuar.');
+        setErrorMessage('Selecione categoria e gênero padrão para continuar.');
         return;
       }
     }
@@ -455,7 +482,7 @@ export const CollectionWizard = ({
       }
 
       if (groupedImages.length === 0) {
-        setErrorMessage('Nao foi possivel criar grupos de produtos a partir das imagens.');
+        setErrorMessage('Não foi possível criar grupos de produtos a partir das imagens.');
         return;
       }
     }
@@ -487,13 +514,13 @@ export const CollectionWizard = ({
     }
 
     if (productDrafts.length === 0) {
-      setErrorMessage('Nao existem produtos para salvar.');
+      setErrorMessage('Não existem produtos para salvar.');
       return;
     }
 
     if (!validateProductDrafts()) {
       setStepIndex(4);
-      setErrorMessage('Revise os produtos com erros antes da confirmacao final.');
+      setErrorMessage('Revise os produtos com erros antes da confirmação final.');
       return;
     }
 
@@ -571,13 +598,13 @@ export const CollectionWizard = ({
         imageCount: uniqueImageIds.length
       });
     } catch (error) {
-      console.error('Erro ao salvar colecao no wizard', error);
+      console.error('Erro ao salvar coleção no wizard', error);
 
       if (savedRefs.length > 0) {
         await Promise.all(savedRefs.map((ref) => ImageStorageService.deleteByRef(ref).catch(() => undefined)));
       }
 
-      setErrorMessage('Nao foi possivel salvar a colecao. Tente novamente.');
+      setErrorMessage('Não foi possível salvar a coleção. Tente novamente.');
     } finally {
       setIsPersistingImages(false);
     }
@@ -587,7 +614,7 @@ export const CollectionWizard = ({
     <section className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Nome da colecao *</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700">Nome da coleção *</label>
           <input
             type="text"
             value={collectionName}
@@ -610,7 +637,7 @@ export const CollectionWizard = ({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Categoria padrao *</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700">Categoria padrão *</label>
           <select value={defaultCategory} onChange={(event) => setDefaultCategory(event.target.value)} className="field-control">
             {categoryOptions.map((category) => (
               <option key={category} value={category}>
@@ -621,7 +648,7 @@ export const CollectionWizard = ({
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Genero padrao *</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700">Gênero padrão *</label>
           <select value={defaultGender} onChange={(event) => setDefaultGender(event.target.value)} className="field-control">
             {genderOptions.map((gender) => (
               <option key={gender} value={gender}>
@@ -648,13 +675,18 @@ export const CollectionWizard = ({
           <div>
             <p className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800">
               <ImagePlus className="h-4 w-4" />
-              Upload multiplo de imagens
+              Upload múltiplo de imagens
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Arraste e solte ou selecione arquivos JPG, PNG ou WEBP de ate {MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB}MB.
+              Arraste e solte ou selecione arquivos JPG, PNG ou WEBP de até {MAX_PRODUCT_IMAGE_UPLOAD_SIZE_MB}MB.
             </p>
           </div>
-          <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isProcessingUpload}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBusy || hasReachedUploadLimit}
+          >
             <FolderUp className="h-4 w-4" />
             Selecionar imagens
           </Button>
@@ -663,9 +695,10 @@ export const CollectionWizard = ({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp"
+          accept={IMAGE_UPLOAD_ACCEPT_ATTR}
           multiple
           className="sr-only"
+          disabled={isBusy || hasReachedUploadLimit}
           onChange={handleFileInputChange}
         />
       </div>
@@ -680,10 +713,16 @@ export const CollectionWizard = ({
             Processando uploads...
           </span>
         )}
+        {hasReachedUploadLimit && (
+          <span className="font-medium text-amber-700">
+            Limite atingido. Remova imagens para adicionar novas.
+          </span>
+        )}
         {imageDrafts.length > 0 && (
           <button
             type="button"
             onClick={handleClearImages}
+            disabled={isBusy}
             className="premium-interactive rounded-md border border-gray-200 bg-white px-2.5 py-1 font-medium text-gray-700 hover:bg-gray-100"
           >
             Limpar tudo
@@ -705,6 +744,7 @@ export const CollectionWizard = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveImageDraft(image.id)}
+                  disabled={isBusy}
                   className="premium-interactive absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full border border-red-100 bg-white/95 text-red-600 hover:bg-red-50"
                   aria-label={`Remover ${image.fileName}`}
                 >
@@ -728,9 +768,9 @@ export const CollectionWizard = ({
     <section className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
         <div>
-          <p className="text-sm font-semibold text-gray-800">Agrupamento automatico por nome de arquivo</p>
+          <p className="text-sm font-semibold text-gray-800">Agrupamento automático por nome de arquivo</p>
           <p className="text-xs text-gray-500">
-            Exemplo: JEANS-001-1.jpg + JEANS-001-2.jpg vira um produto JEANS-001. Sem padrao reconhecido, cada arquivo vira um produto.
+            Exemplo: JEANS-001-1.jpg + JEANS-001-2.jpg vira um produto JEANS-001. Sem padrão reconhecido, cada arquivo vira um produto.
           </p>
         </div>
         <Button type="button" variant="outline" onClick={regenerateProductDrafts} disabled={imageDrafts.length === 0}>
@@ -791,11 +831,11 @@ export const CollectionWizard = ({
     <section className="space-y-4">
       <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
         <p className="text-sm font-semibold text-gray-800">Editar varios produtos ao mesmo tempo</p>
-        <p className="mt-1 text-xs text-gray-500">Aplique preco, categoria, genero e tamanhos para todos os itens.</p>
+        <p className="mt-1 text-xs text-gray-500">Aplique preço, categoria, gênero e tamanhos para todos os itens.</p>
 
         <div className="mt-4 grid gap-3 md:grid-cols-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-700">Preco (R$)</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Preço (R$)</label>
             <input type="text" value={batchPriceInput} onChange={(event) => setBatchPriceInput(event.target.value)} className="field-control py-2" />
           </div>
 
@@ -811,7 +851,7 @@ export const CollectionWizard = ({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-gray-700">Genero</label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Gênero</label>
             <select value={batchGender} onChange={(event) => setBatchGender(event.target.value)} className="field-control py-2">
               {genderOptions.map((gender) => (
                 <option key={gender} value={gender}>
@@ -921,7 +961,7 @@ export const CollectionWizard = ({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-700">Preco</label>
+                    <label className="mb-1 block text-xs font-medium text-gray-700">Preço</label>
                     <input type="text" value={product.priceInput} onChange={(event) => updateProductDraft(product.id, { priceInput: event.target.value })} className="field-control py-2" />
                   </div>
                   <div>
@@ -936,7 +976,7 @@ export const CollectionWizard = ({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-700">Genero</label>
+                    <label className="mb-1 block text-xs font-medium text-gray-700">Gênero</label>
                     <select value={product.gender} onChange={(event) => updateProductDraft(product.id, { gender: event.target.value })} className="field-control py-2">
                       {genderOptions.map((gender) => (
                         <option key={gender} value={gender}>
@@ -959,7 +999,7 @@ export const CollectionWizard = ({
 
                 <div className="mt-3 grid gap-3 md:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-gray-700">Descricao</label>
+                    <label className="mb-1 block text-xs font-medium text-gray-700">Descrição</label>
                     <textarea rows={3} value={product.description} onChange={(event) => updateProductDraft(product.id, { description: event.target.value })} className="field-control py-2" />
                   </div>
 
@@ -1004,10 +1044,10 @@ export const CollectionWizard = ({
   const renderStep6 = () => (
     <section className="space-y-4">
       <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
-        <h3 className="text-base font-semibold tracking-tight text-gray-900">Resumo da colecao</h3>
+        <h3 className="text-base font-semibold tracking-tight text-gray-900">Resumo da coleção</h3>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-xl border border-gray-200 bg-white px-3 py-2">
-            <p className="text-[11px] uppercase tracking-[0.1em] text-gray-500">Colecao</p>
+            <p className="text-[11px] uppercase tracking-[0.1em] text-gray-500">Coleção</p>
             <p className="mt-1 text-sm font-semibold text-gray-800">{collectionName || '-'}</p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-white px-3 py-2">
@@ -1028,9 +1068,9 @@ export const CollectionWizard = ({
       <div className="rounded-2xl border border-gray-200 bg-white p-4">
         <p className="inline-flex items-center gap-2 text-sm font-semibold text-gray-800">
           <Sparkles className="h-4 w-4 text-gray-500" />
-          Confirmacao final
+          Confirmação final
         </p>
-        <p className="mt-1 text-xs text-gray-500">Ao confirmar, os produtos serao salvos no catalogo local.</p>
+        <p className="mt-1 text-xs text-gray-500">Ao confirmar, os produtos serão salvos no catálogo local.</p>
 
         {isPersistingImages && persistTotal > 0 && (
           <div className="mt-3">
@@ -1076,7 +1116,7 @@ export const CollectionWizard = ({
       isOpen={isOpen}
       onClose={closeWizard}
       title="Collection Wizard"
-      description="Crie uma colecao completa com upload visual e edicao em lote, sem depender de CSV."
+      description="Crie uma coleção completa com upload visual e edição em lote, sem depender de CSV."
       maxWidthClassName="sm:max-w-7xl"
       bodyClassName="p-0"
     >
@@ -1139,7 +1179,7 @@ export const CollectionWizard = ({
               </Button>
             ) : (
               <Button type="button" onClick={goToNextStep} disabled={isBusy}>
-                Avancar
+                Avançar
                 <ChevronRight className="h-4 w-4" />
               </Button>
             )}
@@ -1149,3 +1189,5 @@ export const CollectionWizard = ({
     </Modal>
   );
 };
+
+

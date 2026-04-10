@@ -206,15 +206,20 @@ const getImageIdFromSource = async (source: string) => {
     return '';
   }
 
-  if (isLocalImageRefSource(normalizedSource)) {
-    return ImageStorageService.parseImageId(normalizedSource);
-  }
+  try {
+    if (isLocalImageRefSource(normalizedSource)) {
+      return ImageStorageService.parseImageId(normalizedSource);
+    }
 
-  if (!isPersistedImageSource(normalizedSource)) {
+    if (!isPersistedImageSource(normalizedSource)) {
+      return '';
+    }
+
+    return await ImageStorageService.saveExternalImage(normalizedSource);
+  } catch (error) {
+    console.error('Falha ao converter imagem para referência local', error);
     return '';
   }
-
-  return ImageStorageService.saveExternalImage(normalizedSource);
 };
 
 const resolveImageIds = async (record: StoredProductRecord, imageSources: string[]) => {
@@ -544,4 +549,3 @@ export const ProductsService = {
     }
   }
 };
-

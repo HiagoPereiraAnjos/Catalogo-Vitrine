@@ -1,8 +1,15 @@
 ﻿import { buildWaMeLink } from '../config/whatsapp';
 import { getBrandSettingsSnapshot, getContactSettingsSnapshot } from './siteBrand';
 
-export type WhatsAppContext = 'home' | 'product' | 'contact' | 'floating';
-export type WhatsAppIntent = 'hero' | 'curation' | 'size-help' | 'product-details' | 'contact-form' | 'general';
+export type WhatsAppContext = 'home' | 'product' | 'contact' | 'floating' | 'cart';
+export type WhatsAppIntent =
+  | 'hero'
+  | 'curation'
+  | 'size-help'
+  | 'product-details'
+  | 'contact-form'
+  | 'general'
+  | 'cart-review';
 
 export interface WhatsAppMessageParams {
   context: WhatsAppContext;
@@ -13,19 +20,88 @@ export interface WhatsAppMessageParams {
   intent?: WhatsAppIntent;
 }
 
+export interface WhatsAppCartItemSummary {
+  name: string;
+  sku?: string;
+  selectedSize: string;
+  selectedColor: string;
+  selectedFit?: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal?: number;
+}
+
+export interface CartWhatsAppPayload {
+  items: WhatsAppCartItemSummary[];
+  totalAmount?: number;
+}
+
+export interface CartWhatsAppStoreSettings {
+  brandName?: string;
+  whatsappUrl?: string;
+}
+
 const contextLabels: Record<WhatsAppContext, string> = {
   home: 'Home',
   product: 'Produto',
   contact: 'Contato',
-  floating: 'Botao flutuante'
+  floating: 'Botão flutuante',
+  cart: 'Sacola'
 };
 
 const routeLabels: Record<string, string> = {
   '/': 'Home',
-  '/produtos': 'Catalogo',
+  '/produtos': 'Catálogo',
   '/sobre': 'Sobre',
   '/contato': 'Contato',
   '/admin': 'Admin'
+};
+
+const formatCurrencyBRL = (value: number) =>
+  new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+
+const normalizeText = (value: string | undefined, fallback: string) => {
+  const sanitized = (value || '').trim();
+  return sanitized || fallback;
+};
+
+const toSafePositiveNumber = (value: number | undefined, fallback = 0) => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const MIN_WHATSAPP_PHONE_LENGTH = 10;
+
+const extractDigits = (value: string) => value.replace(/\D/g, '');
+
+const isValidWhatsAppPhone = (digits: string) => digits.length >= MIN_WHATSAPP_PHONE_LENGTH;
+
+const buildWaMeBaseFromPhone = (digits: string) => `https://wa.me/${digits}`;
+
+const extractWhatsAppPhoneFromUrl = (url: URL) => {
+  const host = url.hostname.toLowerCase();
+  const queryPhone = extractDigits(url.searchParams.get('phone') || '');
+  if (isValidWhatsAppPhone(queryPhone)) {
+    return queryPhone;
+  }
+
+  const pathPhone = extractDigits(url.pathname);
+
+  if (host.endsWith('wa.me') && isValidWhatsAppPhone(pathPhone)) {
+    return pathPhone;
+  }
+
+  if (host.includes('whatsapp') && isValidWhatsAppPhone(pathPhone)) {
+    return pathPhone;
+  }
+
+  return '';
 };
 
 export const resolveWhatsAppContextFromPath = (path: string): WhatsAppContext => {
@@ -47,35 +123,95 @@ export const resolveWhatsAppContextFromPath = (path: string): WhatsAppContext =>
 const buildHomeMessage = (brandName: string, intent: WhatsAppMessageParams['intent']) => {
   switch (intent) {
     case 'hero':
-      return `Ola! Vim pela Home da ${brandName} e quero conhecer os jeans da nova colecao com maior procura.`;
+      return `Olá! Vim pela Home da ${brandName} e quero conhecer os jeans da nova coleção com maior procura.`;
     case 'size-help':
-      return `Ola! Quero ajuda para escolher tamanho e modelagem ideais no catalogo da ${brandName}.`;
+      return `Olá! Quero ajuda para escolher tamanho e modelagem ideais no catálogo da ${brandName}.`;
     case 'curation':
-      return `Ola! Quero uma curadoria rapida com pecas premium da ${brandName} para montar meu look.`;
+      return `Olá! Quero uma curadoria rápida com peças premium da ${brandName} para montar meu look.`;
     default:
-      return `Ola! Vim pela Home da ${brandName} e quero atendimento comercial para escolher as melhores pecas.`;
+      return `Olá! Vim pela Home da ${brandName} e quero atendimento comercial para escolher as melhores peças.`;
   }
 };
 
 const buildProductMessage = ({ productName, productCode, productPrice }: WhatsAppMessageParams) => {
-  const safeProductName = productName || 'peca do catalogo';
-  const safeCode = productCode || 'sem-codigo';
-  const safePrice = productPrice ? ` | Preco de referencia: ${productPrice}` : '';
+  const safeProductName = productName || 'peça do catálogo';
+  const safeCode = productCode || 'sem-código';
+  const safePrice = productPrice ? ` | Preço de referência: ${productPrice}` : '';
 
-  return `Ola! Tenho interesse em "${safeProductName}" | SKU/Codigo: ${safeCode}${safePrice}. Pode me confirmar disponibilidade, grade de tamanhos e prazo de envio?`;
+  return `Olá! Tenho interesse em "${safeProductName}" | SKU/Código: ${safeCode}${safePrice}. Pode me confirmar disponibilidade, grade de tamanhos e prazo de envio?`;
 };
 
 const buildContactMessage = (brandName: string, intent: WhatsAppMessageParams['intent']) => {
   if (intent === 'contact-form') {
-    return `Ola! Vim pela pagina de contato da ${brandName} e quero atendimento para duvidas comerciais e suporte de compra.`;
+    return `Olá! Vim pela página de contato da ${brandName} e quero atendimento para dúvidas comerciais e suporte de compra.`;
   }
 
-  return `Ola! Vim pela pagina de contato da ${brandName} e quero falar com o time comercial agora.`;
+  return `Olá! Vim pela página de contato da ${brandName} e quero falar com o time comercial agora.`;
 };
 
 const buildFloatingMessage = (brandName: string, routePath?: string) => {
   const routeLabel = routePath ? routeLabels[routePath] || routePath : 'Site';
-  return `Ola! Estou navegando em ${routeLabel} no site da ${brandName} e quero atendimento rapido no WhatsApp para avancar na compra.`;
+  return `Olá! Estou navegando em ${routeLabel} no site da ${brandName} e quero atendimento rápido no WhatsApp para avançar na compra.`;
+};
+
+export const buildCartWhatsAppMessage = (cart: CartWhatsAppPayload, storeSettings?: CartWhatsAppStoreSettings) => {
+  const brand = getBrandSettingsSnapshot();
+  const brandName = normalizeText(storeSettings?.brandName, normalizeText(brand.name, 'a loja'));
+
+  const items = Array.isArray(cart.items) ? cart.items : [];
+
+  if (items.length === 0) {
+    return [
+      `Olá! Gostaria de finalizar meu atendimento com a ${brandName}.`,
+      '',
+      'Minha sacola está vazia no momento, mas quero ajuda para montar o pedido.',
+      '',
+      'Aguardo atendimento para concluir a compra. Obrigado!'
+    ].join('\n');
+  }
+
+  const normalizedItems = items.map((item) => {
+    const quantity = Math.max(1, Math.floor(toSafePositiveNumber(item.quantity, 1)));
+    const unitPrice = toSafePositiveNumber(item.unitPrice, 0);
+    const subtotal = toSafePositiveNumber(item.subtotal, Number((unitPrice * quantity).toFixed(2)));
+
+    return {
+      name: normalizeText(item.name, 'Produto sem nome'),
+      sku: normalizeText(item.sku, 'sem-código'),
+      selectedSize: normalizeText(item.selectedSize, 'Não informado'),
+      selectedColor: normalizeText(item.selectedColor, 'Não informado'),
+      selectedFit: normalizeText(item.selectedFit, ''),
+      quantity,
+      unitPrice,
+      subtotal
+    };
+  });
+
+  const computedTotal = Number(normalizedItems.reduce((sum, item) => sum + item.subtotal, 0).toFixed(2));
+  const providedTotal = toSafePositiveNumber(cart.totalAmount, computedTotal);
+  const resolvedTotal = Math.abs(providedTotal - computedTotal) <= 0.01 ? providedTotal : computedTotal;
+
+  const lines: string[] = ['Olá! Gostaria de finalizar meu atendimento com os itens abaixo:', ''];
+
+  normalizedItems.forEach((item, index) => {
+    lines.push(`${index + 1}. Produto: ${item.name}`);
+    lines.push(`Código: ${item.sku}`);
+    lines.push(`Tamanho: ${item.selectedSize}`);
+    lines.push(`Cor/Lavagem: ${item.selectedColor}`);
+    if (item.selectedFit) {
+      lines.push(`Modelagem: ${item.selectedFit}`);
+    }
+    lines.push(`Quantidade: ${item.quantity}`);
+    lines.push(`Valor unitário: ${formatCurrencyBRL(item.unitPrice)}`);
+    lines.push(`Subtotal: ${formatCurrencyBRL(item.subtotal)}`);
+    lines.push('');
+  });
+
+  lines.push(`Total do pedido: ${formatCurrencyBRL(resolvedTotal)}`);
+  lines.push('');
+  lines.push('Aguardo atendimento para concluir a compra. Obrigado!');
+
+  return lines.join('\n');
 };
 
 export const buildWhatsAppMessage = (params: WhatsAppMessageParams) => {
@@ -93,6 +229,9 @@ export const buildWhatsAppMessage = (params: WhatsAppMessageParams) => {
     case 'contact':
       content = buildContactMessage(brandName, params.intent);
       break;
+    case 'cart':
+      content = buildFloatingMessage(brandName, params.routePath);
+      break;
     case 'floating':
     default:
       content = buildFloatingMessage(brandName, params.routePath);
@@ -102,10 +241,10 @@ export const buildWhatsAppMessage = (params: WhatsAppMessageParams) => {
   return `${content} [Origem: ${contextLabels[params.context]}]`;
 };
 
-const resolveWhatsAppBaseLink = () => {
+const resolveWhatsAppBaseLink = (preferredWhatsAppUrl?: string) => {
   const contact = getContactSettingsSnapshot();
   const brand = getBrandSettingsSnapshot();
-  const candidates = [contact.whatsappUrl, brand.whatsappUrl];
+  const candidates = [preferredWhatsAppUrl || '', contact.whatsappUrl, brand.whatsappUrl];
 
   for (const candidate of candidates) {
     const rawUrl = candidate.trim();
@@ -113,12 +252,27 @@ const resolveWhatsAppBaseLink = () => {
       continue;
     }
 
+    const directPhone = extractDigits(rawUrl);
+    const looksLikeDirectPhone = !rawUrl.includes('://') && !rawUrl.includes('/');
+    if (looksLikeDirectPhone && isValidWhatsAppPhone(directPhone)) {
+      return buildWaMeBaseFromPhone(directPhone);
+    }
+
     const normalizedValue = rawUrl.includes('://') ? rawUrl : `https://${rawUrl}`;
-    const cleanValue = normalizedValue.split('?')[0];
 
     try {
-      const parsed = new URL(cleanValue);
+      const parsed = new URL(normalizedValue);
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        continue;
+      }
+
+      const phoneFromUrl = extractWhatsAppPhoneFromUrl(parsed);
+      if (isValidWhatsAppPhone(phoneFromUrl)) {
+        return buildWaMeBaseFromPhone(phoneFromUrl);
+      }
+
+      const host = parsed.hostname.toLowerCase();
+      if (host.endsWith('wa.me') || host.includes('whatsapp')) {
         continue;
       }
 
@@ -134,6 +288,11 @@ const resolveWhatsAppBaseLink = () => {
 export const buildWhatsAppHref = (params: WhatsAppMessageParams) => {
   const message = buildWhatsAppMessage(params);
   return buildWaMeLink(message, resolveWhatsAppBaseLink());
+};
+
+export const buildWhatsAppCartHref = (cart: CartWhatsAppPayload, storeSettings?: CartWhatsAppStoreSettings) => {
+  const message = buildCartWhatsAppMessage(cart, storeSettings);
+  return buildWaMeLink(message, resolveWhatsAppBaseLink(storeSettings?.whatsappUrl));
 };
 
 const whatsappButtonBaseClass =

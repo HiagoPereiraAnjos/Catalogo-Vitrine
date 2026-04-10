@@ -6,7 +6,7 @@ interface ProductsHeaderProps {
   headingId?: string;
 }
 
-export const ProductsHeader = ({ title = 'Colecao', headingId }: ProductsHeaderProps) => {
+export const ProductsHeader = ({ title = 'Coleção', headingId }: ProductsHeaderProps) => {
   const { settings } = useSiteSettings();
   const brand = settings.brand;
   const home = settings.home;

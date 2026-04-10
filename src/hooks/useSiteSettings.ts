@@ -34,7 +34,7 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
       setSettings(nextSettings);
     } catch (caughtError) {
       console.error('Failed to load site settings', caughtError);
-      setError('Nao foi possivel carregar as configuracoes do site.');
+      setError('Não foi possível carregar as configurações do site.');
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +49,7 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
       return savedSettings;
     } catch (caughtError) {
       console.error('Failed to save site settings', caughtError);
-      setError('Nao foi possivel salvar as configuracoes do site.');
+      setError('Não foi possível salvar as configurações do site.');
       throw caughtError;
     }
   }, []);
@@ -67,7 +67,7 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
         return savedSettings;
       } catch (caughtError) {
         console.error(`Failed to save site settings module "${moduleKey}"`, caughtError);
-        setError('Nao foi possivel salvar as configuracoes deste modulo.');
+        setError('Não foi possível salvar as configurações deste módulo.');
         throw caughtError;
       }
     },
@@ -83,7 +83,7 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
       return resetedSettings;
     } catch (caughtError) {
       console.error('Failed to reset site settings', caughtError);
-      setError('Nao foi possivel restaurar as configuracoes padrao.');
+      setError('Não foi possível restaurar as configurações padrão.');
       throw caughtError;
     }
   }, []);
@@ -97,7 +97,7 @@ export const useSiteSettings = (): UseSiteSettingsResult => {
       return resetedSettings;
     } catch (caughtError) {
       console.error(`Failed to reset site settings module "${moduleKey}"`, caughtError);
-      setError('Nao foi possivel restaurar este modulo para o padrao.');
+      setError('Não foi possível restaurar este módulo para o padrão.');
       throw caughtError;
     }
   }, []);

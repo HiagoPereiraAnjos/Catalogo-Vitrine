@@ -8,6 +8,8 @@ import { useSiteSettings } from '../hooks/useSiteSettings';
 import { ImageStorageService } from '../services/imageStorageService';
 import { applyAppearanceTheme } from '../utils/appearanceTheme';
 import { defaultSiteSettings } from '../data/defaultSiteSettings';
+import { CartDrawer } from './CartDrawer';
+import { CartActionToast } from './CartActionToast';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -18,7 +20,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { settings } = useSiteSettings();
   const brand = settings.brand;
   const contact = settings.contact;
-  const shouldShowFloatingWhatsApp = !location.pathname.startsWith('/admin');
+  const isPublicRoute = !location.pathname.startsWith('/admin');
+  const shouldShowFloatingWhatsApp = isPublicRoute && location.pathname !== '/sacola';
   const floatingWhatsAppHref = buildWhatsAppHref({
     context: 'floating',
     routePath: location.pathname,
@@ -118,6 +121,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </span>
         </a>
       )}
+
+      {isPublicRoute && <CartDrawer />}
+      {isPublicRoute && <CartActionToast />}
 
       <style>{`
         .hide-scrollbar::-webkit-scrollbar {

@@ -1,15 +1,33 @@
-﻿import React, { memo } from 'react';
+﻿import React, { memo, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowUpRight, ShoppingBag } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import { Product } from '../types';
 import { formatPrice } from '../utils/formatters';
 import { getProductBadge, getStockStatusMeta } from '../utils/product';
+import { Button } from './Button';
 import { CatalogImage } from './CatalogImage';
 
 interface ProductCardProps {
   product: Product;
 }
+
+const getFitOptions = (fitValue?: string) => {
+  const source = (fitValue || '').trim();
+  if (!source) {
+    return [];
+  }
+
+  if (!source.includes('|')) {
+    return [source];
+  }
+
+  return source
+    .split('|')
+    .map((option) => option.trim())
+    .filter(Boolean);
+};
 
 const resolveCollectionBadge = (product: Product) => {
   if (product.isNew && product.season?.trim()) {
@@ -21,9 +39,95 @@ const resolveCollectionBadge = (product: Product) => {
 };
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
+  const navigate = useNavigate();
+  const { addItem, quantityByProductId } = useCart();
+  const [addFeedback, setAddFeedback] = useState<'idle' | 'added' | 'merged' | 'needs_selection'>('idle');
+  const feedbackTimeoutRef = useRef<number | null>(null);
+
   const badge = resolveCollectionBadge(product);
   const stockStatus = getStockStatusMeta(product.stockStatus);
   const titleId = `product-card-title-${product.id}`;
+  const isOutOfStock = product.stockStatus === 'out_of_stock';
+  const inCartQuantity = quantityByProductId[product.id] || 0;
+  const sizeOptions = product.sizes.length > 0 ? product.sizes : ['Unico'];
+  const colorOptions = product.colors && product.colors.length > 0 ? product.colors : ['Padrao'];
+  const fitOptions = getFitOptions(product.fit);
+  const requiresVariantSelection = product.sizes.length > 1 || Boolean(product.colors && product.colors.length > 1) || fitOptions.length > 1;
+
+  useEffect(() => {
+    return () => {
+      if (feedbackTimeoutRef.current !== null) {
+        window.clearTimeout(feedbackTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleFeedbackReset = (delayMs = 1800) => {
+    if (feedbackTimeoutRef.current !== null) {
+      window.clearTimeout(feedbackTimeoutRef.current);
+    }
+
+    feedbackTimeoutRef.current = window.setTimeout(() => {
+      setAddFeedback('idle');
+    }, delayMs);
+  };
+
+  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isOutOfStock) {
+      return;
+    }
+
+    if (requiresVariantSelection) {
+      setAddFeedback('needs_selection');
+      scheduleFeedbackReset(2200);
+      navigate(`/produto/${product.id}`);
+      return;
+    }
+
+    const result = addItem({
+      productId: product.id,
+      name: product.name,
+      sku: product.sku,
+      image: product.featuredImage,
+      price: product.price,
+      quantity: 1,
+      selectedSize: sizeOptions[0],
+      selectedColor: colorOptions[0],
+      selectedFit: fitOptions[0] || '',
+      sizeOptions,
+      colorOptions,
+      fitOptions,
+      requiresSizeSelection: product.sizes.length > 1,
+      requiresColorSelection: Boolean(product.colors && product.colors.length > 1),
+      requiresFitSelection: fitOptions.length > 1
+    });
+
+    if (result.status === 'invalid') {
+      setAddFeedback('needs_selection');
+      scheduleFeedbackReset(2200);
+      navigate(`/produto/${product.id}`);
+      return;
+    }
+
+    setAddFeedback(result.status);
+    scheduleFeedbackReset();
+  };
+
+  const actionLabel =
+    addFeedback === 'needs_selection'
+      ? 'Escolher variações'
+      : addFeedback === 'added'
+        ? 'Na sacola'
+        : addFeedback === 'merged'
+          ? 'Sacola atualizada'
+          : isOutOfStock
+            ? 'Indisponível'
+            : inCartQuantity > 0
+              ? 'Adicionar mais'
+              : 'Adicionar para orçamento';
 
   return (
     <motion.article
@@ -72,6 +176,12 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </AnimatePresence>
 
+          {inCartQuantity > 0 && (
+            <span className="absolute right-3 top-3 z-10 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-700">
+              Na sacola: {inCartQuantity}
+            </span>
+          )}
+
           <div className="absolute inset-x-4 bottom-4 translate-y-3 rounded-full border border-white/80 bg-white/95 px-4 py-2 opacity-0 shadow-md backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-900">
               Ver peça
@@ -119,6 +229,25 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
       </Link>
+
+      <div className="border-t border-gray-100 px-4 py-3">
+        <Button
+          type="button"
+          onClick={handleAddToCart}
+          fullWidth
+          size="sm"
+          variant={addFeedback === 'idle' ? (inCartQuantity > 0 ? 'outline' : 'secondary') : 'primary'}
+          disabled={isOutOfStock}
+          className="justify-center"
+          aria-label={isOutOfStock ? `${product.name} indisponível` : `Adicionar ${product.name} à sacola`}
+        >
+          <ShoppingBag className="h-4 w-4" />
+          {actionLabel}
+        </Button>
+        {requiresVariantSelection && (
+          <p className="mt-2 text-center text-[11px] text-gray-500">Escolha tamanho e lavagem na página da peça para evitar pedido ambíguo.</p>
+        )}
+      </div>
     </motion.article>
   );
 };
@@ -126,6 +255,11 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
 export const ProductCard = memo(ProductCardComponent, (prevProps, nextProps) => {
   const prev = prevProps.product;
   const next = nextProps.product;
+
+  const prevSizes = prev.sizes.join('|');
+  const nextSizes = next.sizes.join('|');
+  const prevColors = (prev.colors || []).join('|');
+  const nextColors = (next.colors || []).join('|');
 
   return (
     prev === next ||
@@ -137,7 +271,11 @@ export const ProductCard = memo(ProductCardComponent, (prevProps, nextProps) => 
       prev.collection === next.collection &&
       prev.season === next.season &&
       prev.stockStatus === next.stockStatus &&
+      prev.sku === next.sku &&
+      prev.fit === next.fit &&
       prev.isFeatured === next.isFeatured &&
-      prev.isNew === next.isNew)
+      prev.isNew === next.isNew &&
+      prevSizes === nextSizes &&
+      prevColors === nextColors)
   );
 });

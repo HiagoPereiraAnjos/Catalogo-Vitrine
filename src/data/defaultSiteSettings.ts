@@ -9,7 +9,7 @@ export const defaultSiteSettings: SiteSettings = {
     shortName: 'Denim',
     tagline: 'Jeans premium com identidade autoral',
     signature: 'Modelagem precisa, lavagem inteligente e atitude urbana.',
-    heroEyebrow: 'Nova colecao de jeans premium',
+    heroEyebrow: 'Nova coleção de jeans premium',
     logoImage: '',
     faviconImage: '',
     institutionalImage: '',
@@ -20,14 +20,14 @@ export const defaultSiteSettings: SiteSettings = {
     instagramHandle: '@denimpremium',
     instagramUrl: 'https://instagram.com/denimpremium',
     addressLine1: 'Av. Paulista, 1000',
-    addressLine2: 'Sao Paulo, SP - 01310-100'
+    addressLine2: 'São Paulo, SP - 01310-100'
   },
   home: {
     heroEyebrow: '',
     heroTag: '',
-    heroTitle: 'Denim premium para uma marca com presenca real',
+    heroTitle: 'Denim premium para uma marca com presença real',
     heroSubtitle: 'Curadoria de jeans com leitura comercial clara e visual refinado.',
-    primaryCtaLabel: 'Ver colecao completa',
+    primaryCtaLabel: 'Ver coleção completa',
     primaryCtaHref: '/produtos',
     secondaryCtaLabel: 'Falar no WhatsApp',
     secondaryCtaHref: '/contato',
@@ -42,28 +42,28 @@ export const defaultSiteSettings: SiteSettings = {
     sectionOrder: ['categories', 'featured', 'collections', 'institutional', 'benefits', 'finalCta'],
     categoriesTitle: 'Categorias em destaque',
     categoriesSubtitle: 'Explore as linhas com curadoria visual para cada perfil e momento comercial.',
-    featuredTitle: 'Pecas em destaque',
-    featuredSubtitle: 'Selecao com maior procura e melhor conversao no atendimento.',
-    collectionsTitle: 'Colecoes em evidencia',
+    featuredTitle: 'Peças em destaque',
+    featuredSubtitle: 'Seleção com maior procura e melhor conversão no atendimento.',
+    collectionsTitle: 'Coleções em evidência',
     collectionsSubtitle:
-      'Organizacao por colecao para facilitar campanhas, drops sazonais e planejamento de vitrine.',
+      'Organização por coleção para facilitar campanhas, drops sazonais e planejamento de vitrine.',
     institutionalEyebrow: 'Assinatura de marca',
     institutionalTitle: 'Estilo comercial com acabamento premium',
     institutionalBodyPrimary:
-      'A Denim combina design limpo, qualidade tecnica e narrativa visual para construir uma marca memoravel em jeanswear.',
+      'A Denim combina design limpo, qualidade técnica e narrativa visual para construir uma marca memorável em jeanswear.',
     institutionalBodySecondary:
-      'Da selecao de tecido ao atendimento final, nossa operacao foi pensada para gerar confianca e percepcao de valor.',
+      'Da seleção de tecido ao atendimento final, nossa operação foi pensada para gerar confiança e percepção de valor.',
     benefitsTitle: 'Por que escolher nossa curadoria',
-    benefitsSubtitle: 'Beneficios que reforcam a percepcao premium da marca.',
+    benefitsSubtitle: 'Benefícios que reforçam a percepção premium da marca.',
     benefitsItems: [
-      'Padrao premium com revisao de qualidade em cada lote.',
+      'Padrão premium com revisão de qualidade em cada lote.',
       'Entrega eficiente para todo o Brasil.',
-      'Suporte consultivo para orientar tamanho, modelagem e combinacao de pecas.'
+      'Suporte consultivo para orientar tamanho, modelagem e combinação de peças.'
     ],
-    finalCtaEyebrow: 'Conversao assistida',
+    finalCtaEyebrow: 'Conversão assistida',
     finalCtaTitle: 'Quer ajuda para fechar o look ideal?',
     finalCtaSubtitle:
-      'Fale com um consultor da marca e receba orientacao de tamanho, modelagem e combinacao de pecas.',
+      'Fale com um consultor da marca e receba orientação de tamanho, modelagem e combinação de peças.',
     finalCtaLabel: 'Receber atendimento imediato',
     finalCtaHref: '',
     featuredProductIds: []
@@ -86,38 +86,38 @@ export const defaultSiteSettings: SiteSettings = {
       'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1200&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop'
     ],
-    storyTitle: 'Nossa historia',
+    storyTitle: 'Nossa história',
     storyText:
-      'A marca nasceu para unir design autoral, conforto real e acabamento premium em jeanswear.\nCom o tempo, evoluimos para uma colecao propria com linguagem moderna e comercial.\nHoje, o catalogo combina pecas essenciais e novidades para uma vitrine consistente.',
+      'A marca nasceu para unir design autoral, conforto real e acabamento premium em jeanswear.\nCom o tempo, evoluímos para uma coleção própria com linguagem moderna e comercial.\nHoje, o catálogo combina peças essenciais e novidades para uma vitrine consistente.',
     institutionalMainText:
-      'Entregar pecas premium com linguagem contemporanea, mantendo performance comercial no uso diario.',
-    missionTitle: 'Missao',
+      'Entregar peças premium com linguagem contemporânea, mantendo performance comercial no uso diário.',
+    missionTitle: 'Missão',
     missionText:
-      'Criar colecoes jeans com identidade clara, alta qualidade e leitura comercial para fortalecer marcas no varejo.',
+      'Criar coleções jeans com identidade clara, alta qualidade e leitura comercial para fortalecer marcas no varejo.',
     valuesTitle: 'Valores',
-    values: ['Qualidade real', 'Design com proposito', 'Consistencia visual', 'Atendimento consultivo'],
+    values: ['Qualidade real', 'Design com propósito', 'Consistência visual', 'Atendimento consultivo'],
     positioningTitle: 'Posicionamento',
     positioningText:
-      'Moda jeans com linguagem moderna, elegante e comercial, pronta para colecoes consistentes.',
+      'Moda jeans com linguagem moderna, elegante e comercial, pronta para coleções consistentes.',
     positioningPhrases: [
       'Curadoria premium com caimento real.',
       'Estilo atemporal com acabamento sofisticado.',
-      'Marca autoral com foco em conversao.'
+      'Marca autoral com foco em conversão.'
     ],
     differentialsTitle: 'Diferenciais',
     differentials: [
       'Modelagem pensada para uso real',
       'Lavagens com assinatura visual',
-      'Curadoria premium para conversao'
+      'Curadoria premium para conversão'
     ]
   },
   contact: {
     title: 'Fale com o time comercial',
-    subtitle: 'Atendimento rapido para duvidas de produto, tamanho e pedidos.',
+    subtitle: 'Atendimento rápido para dúvidas de produto, tamanho e pedidos.',
     supportText:
-      'Estamos prontos para apoiar sua decisao com orientacao de tamanho, combinacao de pecas e sugestoes comerciais.',
+      'Estamos prontos para apoiar sua decisão com orientação de tamanho, combinação de peças e sugestões comerciais.',
     ctaTitle: 'Precisa de ajuda para escolher?',
-    ctaDescription: 'Nosso atendimento responde rapido e indica as melhores pecas para seu perfil.',
+    ctaDescription: 'Nosso atendimento responde rápido e indica as melhores peças para seu perfil.',
     primaryCtaLabel: 'Falar com especialista agora',
     whatsappDisplay: WHATSAPP_CONFIG.displayNumber,
     whatsappUrl: getWhatsAppBaseLink(),
@@ -128,8 +128,8 @@ export const defaultSiteSettings: SiteSettings = {
     facebookLabel: 'Denim Premium',
     facebookUrl: '',
     addressLine1: 'Av. Paulista, 1000',
-    addressLine2: 'Sao Paulo, SP - 01310-100',
-    businessHours: 'Segunda a sexta, das 9h as 18h',
+    addressLine2: 'São Paulo, SP - 01310-100',
+    businessHours: 'Segunda a sexta, das 9h às 18h',
     showAddress: true,
     showSocialLinks: true
   },
@@ -137,32 +137,32 @@ export const defaultSiteSettings: SiteSettings = {
     defaultTitle: 'Denim Premium',
     institutionalTitle: 'Denim Premium',
     defaultDescription:
-      'Catalogo digital de jeans premium com curadoria comercial, estilo autoral e atendimento rapido.',
+      'Catálogo digital de jeans premium com curadoria comercial, estilo autoral e atendimento rápido.',
     defaultOgImage: '/mock/editorial/editorial-01.svg',
-    primaryKeywords: 'jeans premium, catalogo digital, moda jeans, denim',
+    primaryKeywords: 'jeans premium, catálogo digital, moda jeans, denim',
     home: {
       title: 'Home',
       description:
-        'Conheca a colecao de jeans premium com pecas em destaque, narrativa de marca e contato direto.'
+        'Conheça a coleção de jeans premium com peças em destaque, narrativa de marca e contato direto.'
     },
     products: {
       title: 'Produtos',
       description:
-        'Explore calcas, jaquetas, bermudas e pecas selecionadas para uma vitrine de moda premium.'
+        'Explore calças, jaquetas, bermudas e peças selecionadas para uma vitrine de moda premium.'
     },
     productDetails: {
       title: 'Produto',
       description:
-        'Detalhes completos da peca: imagens, modelagem, preco e contato rapido para atendimento.'
+        'Detalhes completos da peça: imagens, modelagem, preço e contato rápido para atendimento.'
     },
     about: {
       title: 'Sobre',
-      description: 'Historia, posicionamento e proposta de valor da marca denim.'
+      description: 'História, posicionamento e proposta de valor da marca denim.'
     },
     contact: {
       title: 'Contato',
       description:
-        'Canal direto com WhatsApp, email e redes sociais para atendimento comercial.'
+        'Canal direto com WhatsApp, e-mail e redes sociais para atendimento comercial.'
     }
   },
   appearance: {

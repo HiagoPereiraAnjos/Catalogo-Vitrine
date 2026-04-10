@@ -26,11 +26,11 @@ export const AdminHeader = ({
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.12em]">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Area reservada
+            Área reservada
           </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight">Painel administrativo</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-200">
-            Gestao visual do catalogo {brandName} com foco em curadoria, organizacao e consistencia de marca.
+            Gestão visual do catálogo {brandName} com foco em curadoria, organização e consistência de marca.
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export const AdminHeader = ({
             type="button"
           >
             <LockKeyhole className="h-4 w-4" />
-            Sair da area reservada
+            Sair da área reservada
           </Button>
           <Button
             variant="light"
@@ -60,7 +60,7 @@ export const AdminHeader = ({
             type="button"
           >
             <WandSparkles className="h-4 w-4" />
-            Criar colecao
+            Criar coleção
           </Button>
           <Button
             variant="light"

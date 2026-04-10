@@ -35,9 +35,9 @@ export interface Notice {
 }
 
 export type AdminStatusFilter = 'all' | 'featured' | 'new';
+export type AdminModuleKey = 'products' | 'collections' | 'media' | 'site' | 'seo' | 'appearance' | 'orders';
 
 export interface CollectionOption {
   name: string;
   count: number;
 }
-

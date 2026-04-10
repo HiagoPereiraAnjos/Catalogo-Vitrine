@@ -255,7 +255,7 @@ export const PLACEHOLDER_LIBRARY = {
   lookbook: buildProductPlaceholderGallery({ style: 'lookbook', category: 'catalogo', seed: 'lookbook', count: 4 }),
   institutional: [
     buildInstitutionalPlaceholder('institucional-1', 'Atelier Denim'),
-    buildInstitutionalPlaceholder('institucional-2', 'Estudio de Colecao'),
+    buildInstitutionalPlaceholder('institucional-2', 'Estúdio de Coleção'),
     buildInstitutionalPlaceholder('institucional-3', 'Curadoria de Marca')
   ],
   editorialMode: buildProductPlaceholderGallery({ style: 'neutral', category: 'catalogo', seed: 'editorial-mode', count: 4 }),

@@ -1,4 +1,5 @@
 export * from './siteSettings';
+export * from './cart';
 
 export type Category = 'Todos' | 'Cal\u00E7as' | 'Jaquetas' | 'Shorts' | 'Camisas' | 'Saias' | 'Macac\u00F5es';
 export type Gender = 'Todos' | 'Masculino' | 'Feminino' | 'Unissex';

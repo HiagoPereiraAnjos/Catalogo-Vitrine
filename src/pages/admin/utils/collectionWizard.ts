@@ -261,7 +261,7 @@ export const parsePriceInput = (value: string) => {
 export const buildDefaultDescription = (name: string, collection: string, season: string) => {
   const suffix = [collection.trim(), season.trim()].filter(Boolean).join(' - ');
   if (suffix) {
-    return `${name} da colecao ${suffix}.`;
+    return `${name} da coleção ${suffix}.`;
   }
 
   return `${name} com acabamento premium e curadoria da marca.`;

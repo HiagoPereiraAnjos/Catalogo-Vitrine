@@ -1,8 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowLeftRight, Image as ImageIcon, Loader2, MoveLeft, MoveRight, Star, Trash2, Upload } from 'lucide-react';
+import { ArrowLeftRight, Image as ImageIcon, Loader2, MoveLeft, MoveRight, Star, Upload } from 'lucide-react';
 import { CatalogImage } from '../../../components/CatalogImage';
 import { FormErrors } from '../types';
-import { isLocalImageRefSource, isPreviewImageSource } from '../../../utils/imageSources';
+import {
+  IMAGE_UPLOAD_ACCEPT_ATTR,
+  isLocalImageRefSource,
+  isPreviewImageSource
+} from '../../../utils/imageSources';
 
 export interface ProductImageManagerItem {
   id: string;
@@ -17,6 +21,7 @@ interface ProductImageManagerProps {
   featuredImage: string;
   imagesInput: string;
   uploadedGalleryCount: number;
+  localGalleryCount: number;
   totalImageCount: number;
   maxImageCount: number;
   hasFeaturedUploadDraft: boolean;
@@ -56,12 +61,11 @@ const formatFileSize = (bytes?: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const filterImageFiles = (files: File[]) => files.filter((file) => file.type.startsWith('image/'));
-
 export const ProductImageManager = ({
   featuredImage,
   imagesInput,
   uploadedGalleryCount,
+  localGalleryCount,
   totalImageCount,
   maxImageCount,
   hasFeaturedUploadDraft,
@@ -96,6 +100,7 @@ export const ProductImageManager = ({
   const hasHiddenFeaturedImageSource = hasFeaturedUploadDraft || isStoredFeaturedImage || isDataFeaturedImage;
   const featuredImageInputValue = hasHiddenFeaturedImageSource ? '' : featuredImage;
   const isAtLimit = totalImageCount >= maxImageCount;
+  const isMediaBusy = isUploadPreparing || isPersistingUploads;
   const firstMovableIndex = imageItems.some((item) => item.isFeatured) ? 1 : 0;
 
   const imageItemsMap = useMemo(() => new Map(imageItems.map((item) => [item.id, item])), [imageItems]);
@@ -103,6 +108,11 @@ export const ProductImageManager = ({
   const handleDropzoneDragOver: React.DragEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (isMediaBusy || isAtLimit) {
+      return;
+    }
+
     if (!isDropzoneActive) {
       setIsDropzoneActive(true);
     }
@@ -119,7 +129,16 @@ export const ProductImageManager = ({
     event.stopPropagation();
     setIsDropzoneActive(false);
 
-    const droppedFiles = filterImageFiles(Array.from(event.dataTransfer.files));
+    if (isMediaBusy || isAtLimit) {
+      return;
+    }
+
+    const fileList = event.dataTransfer.files;
+    const droppedFiles = fileList
+      ? Array.from({ length: fileList.length }, (_, index) => fileList.item(index)).filter(
+          (file): file is File => file !== null
+        )
+      : [];
     if (droppedFiles.length === 0) {
       return;
     }
@@ -128,10 +147,18 @@ export const ProductImageManager = ({
   };
 
   const handleImageDragStart = (imageId: string) => {
+    if (isMediaBusy) {
+      return;
+    }
     setDraggedImageId(imageId);
   };
 
   const handleImageDrop = (targetId: string) => {
+    if (isMediaBusy) {
+      setDraggedImageId(null);
+      return;
+    }
+
     if (!draggedImageId || draggedImageId === targetId) {
       setDraggedImageId(null);
       return;
@@ -150,7 +177,7 @@ export const ProductImageManager = ({
     <>
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-gray-700">Imagem destaque (URL) *</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700">Imagem de destaque (URL) *</label>
           <input
             type="url"
             value={featuredImageInputValue}
@@ -162,11 +189,12 @@ export const ProductImageManager = ({
 
           <label className="premium-interactive mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">
             <Upload className="h-4 w-4" />
-            Upload da imagem destaque
+            Upload da imagem de destaque
             <input
               type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
+              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
               className="sr-only"
+              disabled={isMediaBusy || (isAtLimit && !hasHiddenFeaturedImageSource)}
               onChange={onFeaturedImageUpload}
             />
           </label>
@@ -183,6 +211,7 @@ export const ProductImageManager = ({
               <button
                 type="button"
                 onClick={() => onFeaturedImageChange('')}
+                disabled={isMediaBusy}
                 className="premium-interactive premium-focus rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 focus-visible:ring-gray-900"
               >
                 Remover
@@ -209,24 +238,30 @@ export const ProductImageManager = ({
             Upload múltiplo da galeria
             <input
               type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
+              accept={IMAGE_UPLOAD_ACCEPT_ATTR}
               multiple
               className="sr-only"
+              disabled={isMediaBusy || isAtLimit}
               onChange={onGalleryUpload}
             />
           </label>
 
           {uploadedGalleryCount > 0 && (
             <div className="mt-2 flex items-center gap-2">
-              <p className="text-xs text-gray-600">{uploadedGalleryCount} imagem(ns) local(is) pronta(s) para salvar.</p>
+              <p className="text-xs text-gray-600">{uploadedGalleryCount} upload(s) pendente(s) para salvar.</p>
               <button
                 type="button"
                 onClick={onClearUploadedGallery}
+                disabled={isMediaBusy}
                 className="premium-interactive premium-focus rounded-md border border-gray-200 px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50 focus-visible:ring-gray-900"
               >
-                Limpar uploads
+                Limpar uploads pendentes
               </button>
             </div>
+          )}
+
+          {localGalleryCount > 0 && (
+            <p className="mt-1 text-xs text-gray-500">{localGalleryCount} imagem(ns) local(is) já salvas no produto.</p>
           )}
 
           <p className="mt-1 text-xs text-gray-500">Você pode combinar URLs e imagens enviadas por upload.</p>
@@ -237,6 +272,7 @@ export const ProductImageManager = ({
         className={`mt-4 rounded-xl border border-dashed p-4 transition-colors ${
           isDropzoneActive ? 'border-gray-900 bg-gray-50' : 'border-gray-300 bg-white'
         }`}
+        aria-busy={isMediaBusy ? 'true' : 'false'}
         onDragOver={handleDropzoneDragOver}
         onDragEnter={handleDropzoneDragOver}
         onDragLeave={handleDropzoneDragLeave}
@@ -246,7 +282,9 @@ export const ProductImageManager = ({
           <ArrowLeftRight className="h-4 w-4" />
           Arraste imagens aqui para upload da galeria
         </p>
-        <p className="mt-1 text-xs text-gray-500">Upload múltiplo com preview em tempo real e sem base64.</p>
+        <p className="mt-1 text-xs text-gray-500">
+          Upload múltiplo com preview em tempo real e persistência local.
+        </p>
       </div>
 
       <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
@@ -319,9 +357,13 @@ export const ProductImageManager = ({
                   className={`rounded-xl border bg-white p-2 transition-colors ${
                     image.isFeatured ? 'border-gray-900 shadow-sm' : 'border-gray-200'
                   }`}
-                  draggable={!image.isFeatured}
+                  draggable={!isMediaBusy && !image.isFeatured}
                   onDragStart={() => handleImageDragStart(image.id)}
                   onDragOver={(event) => {
+                    if (isMediaBusy) {
+                      return;
+                    }
+
                     if (draggedImageId && draggedImageId !== image.id) {
                       event.preventDefault();
                     }
@@ -348,6 +390,7 @@ export const ProductImageManager = ({
                         Imagem inválida
                       </div>
                     )}
+
                     {image.isFeatured && (
                       <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-gray-900 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
                         <Star className="h-3 w-3" />
@@ -368,7 +411,7 @@ export const ProductImageManager = ({
                     <button
                       type="button"
                       onClick={() => onSetFeaturedImage(image.id)}
-                      disabled={image.isFeatured || !image.canSetFeatured}
+                      disabled={isMediaBusy || image.isFeatured || !image.canSetFeatured}
                       className="premium-interactive rounded-md border border-gray-200 px-2 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Principal
@@ -376,7 +419,8 @@ export const ProductImageManager = ({
                     <button
                       type="button"
                       onClick={() => onRemoveImage(image.id)}
-                      className="premium-interactive rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50"
+                      disabled={isMediaBusy}
+                      className="premium-interactive rounded-md border border-red-200 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Remover
                     </button>
@@ -387,7 +431,7 @@ export const ProductImageManager = ({
                       <button
                         type="button"
                         onClick={() => onMoveImage(image.id, 'left')}
-                        disabled={!canMoveLeft}
+                        disabled={isMediaBusy || !canMoveLeft}
                         className="premium-interactive inline-flex items-center justify-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-[11px] text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <MoveLeft className="h-3 w-3" />
@@ -396,7 +440,7 @@ export const ProductImageManager = ({
                       <button
                         type="button"
                         onClick={() => onMoveImage(image.id, 'right')}
-                        disabled={!canMoveRight}
+                        disabled={isMediaBusy || !canMoveRight}
                         className="premium-interactive inline-flex items-center justify-center gap-1 rounded-md border border-gray-200 px-2 py-1 text-[11px] text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <MoveRight className="h-3 w-3" />

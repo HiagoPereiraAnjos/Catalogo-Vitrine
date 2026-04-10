@@ -104,7 +104,7 @@ export default function About() {
         <Container>
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div>
-              <p className="section-eyebrow mb-3">Historia da marca</p>
+              <p className="section-eyebrow mb-3">História da marca</p>
               <h2 className="section-title mb-6">{storyTitle}</h2>
               <div className="space-y-4 leading-relaxed text-gray-600">
                 {storyParagraphs.map((paragraph, index) => (
@@ -170,7 +170,7 @@ export default function About() {
               <p className="section-eyebrow mb-3">Universo da marca</p>
               <h2 className="section-title mb-4 text-3xl">Imagens institucionais</h2>
               <p className="section-support">
-                Conteudo visual com foco em autenticidade, modelagem e valor percebido da colecao.
+                Conteúdo visual com foco em autenticidade, modelagem e valor percebido da coleção.
               </p>
             </div>
 
@@ -199,10 +199,10 @@ export default function About() {
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-3xl" style={{ fontFamily: 'var(--font-serif)' }}>
-                Pronto para conhecer a colecao completa?
+                Pronto para conhecer a coleção completa?
               </h2>
               <p className="mt-3 text-gray-300">
-                Explore nossas pecas e fale com nosso time para orientacao de estilo, tamanho e conversao de look.
+                Explore nossas peças e fale com nosso time para orientação de estilo, tamanho e conversão de look.
               </p>
             </div>
 
